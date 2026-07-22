@@ -70,14 +70,25 @@ floors:
         # cada slot aceita "MATERIAL" simples ou { material: MATERIAL, enchantments: { nome: nivel } }
         equipment:
           hand:
-            material: IRON_SWORD
+            material: DIAMOND_SWORD
             enchantments:
-              sharpness: 3
-              fire_aspect: 1
-          helmet: IRON_HELMET
-          chestplate: IRON_CHESTPLATE
-          leggings: IRON_LEGGINGS
-          boots: IRON_BOOTS
+              sharpness: 5
+          helmet:
+            material: DIAMOND_HELMET
+            enchantments:
+              protection: 4
+          chestplate:
+            material: DIAMOND_CHESTPLATE
+            enchantments:
+              protection: 4
+          leggings:
+            material: DIAMOND_LEGGINGS
+            enchantments:
+              protection: 4
+          boots:
+            material: DIAMOND_BOOTS
+            enchantments:
+              protection: 4
         spawns:
           - world: world
             x: 0.5
