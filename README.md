@@ -140,7 +140,7 @@ Principais chaves:
 
 ### `menus.yml`
 
-Controla three telas:
+Controla três telas:
 
 - `main_menu` — botões **Solo** (slot 12) e **Party** (slot 14) que abrem os respectivos submenus.
 - `player_stats_menu` — cards de estatística Solo/Party com placeholders `{player} {soloRuns} {soloWins} {soloLosses} {partyRuns} {partyWins} {partyLosses}`.
@@ -173,8 +173,51 @@ Cada arquivo YAML descreve uma dungeon. Chaves principais:
 | `party_leader_spawn` / `party_member_spawns` | Spawns específicos do modo party |
 | `return_spawn` | Local de retorno ao concluir/sair (cai no `spawn` global do `config.yml` se ausente) |
 | `titles.preparing` / `on_enter` / `floor_cleared` / `completed` | Titles específicos da dungeon (placeholders `{delay} {floor} {dungeon}`) |
-| `floors.<n>.mobs` | Lista de mobs do andar `n`: `type` (vanilla) **ou** `mythic` (nome no MythicMobs), `amount`, `spawns` (lista de coordenadas) |
+| `floors.<n>.mobs` | Lista de mobs do andar `n` — ver [Configuração de mobs](#configuração-de-mobs-vanilla-vs-mythicmobs) abaixo |
 | `floors.<n>.rewards` | `enabled`, `items` (lista `type`/`amount`) e/ou `commands` (executados como console, com `{player}`) |
+
+#### Configuração de mobs: vanilla vs MythicMobs
+
+Cada entrada de `floors.<n>.mobs` é **um** dos dois formatos abaixo (`type` para mob vanilla, `mythic` para MythicMobs). Se ambos os campos aparecerem na mesma entrada, `mythic` tem prioridade e `type` é ignorado — então nunca misture os dois, use um ou outro (código: [`DungeonSession.spawnFloorMobs`](src/main/java/com/eternity/infinitytower/tower/session/DungeonSession.java#L644-L720)).
+
+**Mob vanilla** — use `type` com o nome do `org.bukkit.entity.EntityType` (maiúsculo, ex.: `ZOMBIE`, `SKELETON`, `SPIDER`, `WITHER_SKELETON`):
+
+```yaml
+floors:
+  1:
+    mobs:
+      - type: ZOMBIE
+        amount: 3
+        spawns:
+          - world: world
+            x: 0.5
+            y: 100.0
+            z: 0.5
+```
+
+**Mob do MythicMobs** — use `mythic` com o nome interno exato do mob (o mesmo definido nos arquivos de config do MythicMobs, ex.: `mythicmobs/Mobs/*.yml`):
+
+```yaml
+floors:
+  2:
+    mobs:
+      - mythic: SkeletalKnight
+        amount: 3
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+```
+
+Regras e comportamento de ambos os formatos:
+
+- `amount` — quantidade a spawnar; distribuída ciclicamente entre os pontos de `spawns` (ex.: 6 mobs com 3 spawns → 2 em cada ponto).
+- `spawns` — lista de coordenadas (`world`, `x`, `y`, `z`); se vazia, o mob cai como fallback na localização de um jogador online.
+- Se `type` for inválido (não existe no `EntityType`), a entrada é ignorada e loga `dungeon.vanilla_mob_invalid` no console.
+- Se `mythic` for usado sem o plugin MythicMobs instalado, a entrada é ignorada e loga `dungeon.mythic_missing` no console (o spawn é feito via reflexão, então o InfinityTower nem precisa do MythicMobs no classpath para compilar).
+- Um andar sem nenhum mob válido spawnado encerra a run automaticamente se `allow_empty_floors: false`.
+- Em **arenas alternativas** (`<id>_arena2`, etc.), a lista `floors.<n>.mobs` da arena normalmente só reescreve `spawns` (mesma ordem/índice da lista raiz) — `type`/`mythic`/`amount` continuam vindo da definição raiz.
 
 **Arenas alternativas:** dentro do mesmo arquivo, uma seção top-level `<dungeonId>_arena2` (ou `arena3`, etc.) sobrescreve apenas os campos informados (tipicamente spawns e `floors.<n>.mobs[].spawns`) por cima da configuração raiz — útil para ter várias instâncias físicas da mesma dungeon sem duplicar todo o YAML. Use `/tower admin setup <dungeonId> <arena>` para editar uma arena específica.
 
