@@ -1,0 +1,319 @@
+display: "&bTorre Party"
+max_floors: 10
+mode: PARTY
+allow_solo_in_party: true
+next_floor_delay_seconds: 5
+allow_empty_floors: false
+start_delay_seconds: 10
+
+titles:
+  preparing:
+    title: "&#00FF7FPrepare-se!"
+    subtitle: "&#FFD700A primeira orda começa em &#FFFFFF{delay}&#FFD700 segundos!"
+  on_enter:
+    title: "&#00FF7FTorre Infinita"
+    subtitle: "&#BEBEBEPrepare-se para a primeira orda!"
+  floor_cleared:
+    title: "&#BEBEBEAndar &#8B0000{floor}&#BEBEBE Concluído!"
+    subtitle: "&#FFD700Iniciando próximo andar em &#FFFFFF{delay}&#FFD700 segundos!"
+  completed:
+    title: "&#00FF7F{dungeon} Concluída!"
+    subtitle: "&#BEBEBEVoltando ao spawn..."
+
+menu-item:
+  material: PAPER
+  custom-model-data: 10133
+  name: "&b{display}"
+  lore:
+    - "&7ID: &f{id}"
+    - "&7Andares: &f{max_floors}"
+    - ""
+    - "&eClique para entrar!"
+
+access:
+  require_key: true
+  consume_key: true
+  key:
+    material: PAPER
+    custom-model-data: 10133
+    name: "&bChave da {display}"
+    lore:
+      - ""
+      - "&7Acesso: &f{id}"
+      - "&7Andares: &f{max_floors}"
+      - ""
+      - "&eUse para entrar!"
+    glow: true
+
+  limiter:
+    enabled: false
+    cooldown_seconds: 0
+    max_entries_per_day: 0
+
+player_spawns:
+  - world: world
+    x: -47.5
+    y: 167.0
+    z: 45.5
+    yaw: 0.0
+    pitch: 0.0
+
+return_spawn:
+  world: world
+  x: -47.5
+  y: 167.0
+  z: 45.5
+  yaw: 0.0
+  pitch: 0.0
+
+floors:
+  1:
+    mobs:
+      - type: ZOMBIE
+        amount: 3
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+          - world: world
+            x: -54.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      items:
+        - type: DIAMOND
+          amount: 1
+
+  2:
+    mobs:
+      - mythic: SkeletalKnight
+        amount: 3
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} emerald 2"
+
+  3:
+    mobs:
+      - mythic: SkeletonKing
+        amount: 1
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} diamond 5"
+
+  4:
+    mobs:
+      - mythic: SkeletalKnight
+        amount: 5
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} diamond 5"
+
+  5:
+    mobs:
+      - mythic: SkeletalKnight
+        amount: 6
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} diamond 5"
+
+  6:
+    mobs:
+      - mythic: SkeletalKnight
+        amount: 7
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} diamond 5"
+
+  7:
+    mobs:
+      - mythic: SkeletalKnight
+        amount: 8
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} diamond 5"
+
+  8:
+    mobs:
+      - mythic: SkeletalKnight
+        amount: 9
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} diamond 5"
+
+  9:
+    mobs:
+      - mythic: SkeletalKnight
+        amount: 10
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} diamond 5"
+
+  10:
+    mobs:
+      - mythic: SkeletonKing
+        amount: 1
+        spawns:
+          - world: world
+            x: -52.5
+            y: 167.0
+            z: 39.5
+    rewards:
+      enabled: true
+      commands:
+        - "give {player} netherite_ingot 3"
+        - "broadcast &6{player} completou a Mythic Tower!"
+
+# ==========================================================
+# ARENA 2 (exemplo) - edita só coords
+# ==========================================================
+
+party_10_arena2:
+  player_spawns:
+    - world: world
+      x: -47.5
+      y: 167.0
+      z: 245.5
+      yaw: 0.0
+      pitch: 0.0
+
+  return_spawn:
+    world: world
+    x: -47.5
+    y: 167.0
+    z: 245.5
+    yaw: 0.0
+    pitch: 0.0
+
+  floors:
+    1:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+            - world: world
+              x: -54.5
+              y: 167.0
+              z: 239.5
+    2:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+    3:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+    4:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+    5:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+    6:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+    7:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+    8:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+    9:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5
+    10:
+      mobs:
+        - spawns:
+            - world: world
+              x: -52.5
+              y: 167.0
+              z: 239.5

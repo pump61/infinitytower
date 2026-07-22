@@ -1,0 +1,210 @@
+# ============================================================
+# InfinityTower - menus.yml
+# Contém: main_menu, player_stats_menu, menus (solo/party)
+# ============================================================
+
+# ------------------------------------------------------------
+# MAIN MENU (menu principal)
+# ------------------------------------------------------------
+main_menu:
+  enabled: true
+  size: 27
+  title: "&8Infinity Tower"
+
+  filler:
+    enabled: true
+    material: "BLACK_STAINED_GLASS_PANE"
+    name: " "
+    lore: []
+    custom_model_data: 0
+
+  buttons:
+    solo:
+      enabled: true
+      slot: 12
+      material: "DIAMOND_SWORD"
+      name: "&a&lDUNGEON SOLO"
+      lore:
+        - ""
+        - "&7Clique para abrir o menu SOLO."
+      custom_model_data: 0
+
+    spacer:
+      enabled: true
+      slot: 13
+      material: "AIR"
+      name: " "
+      lore: []
+      custom_model_data: 0
+
+    party:
+      enabled: true
+      slot: 14
+      material: "GOLDEN_SWORD"
+      name: "&e&lDUNGEON PARTY"
+      lore:
+        - ""
+        - "&7Clique para abrir o menu PARTY."
+      custom_model_data: 0
+
+
+# ------------------------------------------------------------
+# PLAYER STATS MENU (estatísticas do jogador)
+# Placeholders:
+# {player}
+# {soloRuns} {soloWins} {soloLosses}
+# {partyRuns} {partyWins} {partyLosses}
+# ------------------------------------------------------------
+player_stats_menu:
+  enabled: true
+  size: 27
+  title: "&8Suas Estatísticas"
+
+  filler:
+    enabled: false
+    material: "BLACK_STAINED_GLASS_PANE"
+    name: " "
+    lore: []
+    custom_model_data: 0
+
+  items:
+    solo:
+      enabled: true
+      slot: 11
+      material: "DIAMOND_SWORD"
+      name: "&a&lSOLO"
+      lore:
+        - ""
+        - "&7Entradas: &f{soloRuns}"
+        - "&7Vitórias: &a{soloWins}"
+        - "&7Derrotas: &c{soloLosses}"
+      custom_model_data: 0
+
+    party:
+      enabled: true
+      slot: 15
+      material: "GOLDEN_SWORD"
+      name: "&6&lPARTY"
+      lore:
+        - ""
+        - "&7Entradas: &f{partyRuns}"
+        - "&7Vitórias: &a{partyWins}"
+        - "&7Derrotas: &c{partyLosses}"
+      custom_model_data: 0
+
+
+# ------------------------------------------------------------
+# DUNGEON MENUS (SOLO / PARTY)
+# Placeholders:
+# {player} {online} {max_online}
+# {id} {display} {mode} {max_floors}
+# ------------------------------------------------------------
+menus:
+  solo:
+    title: "&8Torres Solo"
+    size: 27
+
+    filler:
+      enabled: true
+      material: "BLACK_STAINED_GLASS_PANE"
+      name: " "
+      lore: []
+      custom_model_data: 0
+      hide_attributes: true
+
+    static-items:
+      info:
+        enabled: true
+        slot: 4
+        material: "BOOK"
+        name: "&e&lINFORMAÇÕES"
+        lore:
+          - ""
+          - "&7Escolha um desafio solo."
+        hide_attributes: true
+
+    leave:
+      enabled: true
+      slot: 22
+      material: "BARRIER"
+      name: "&c&lSAIR"
+      lore:
+        - "&7Clique para fechar."
+      hide_attributes: true
+
+    dungeon-slots:
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+
+    dungeon-item:
+      material: "ENDER_EYE"
+      amount: 1
+      name: "&a&l{display}"
+      lore:
+        - ""
+        - "&7Modo: &f{mode}"
+        - "&7Andares: &f{max_floors}"
+        - ""
+        - "&eClique para entrar!"
+      custom_model_data: 0
+      hide_attributes: true
+
+
+  party:
+    title: "&8Torres Party"
+    size: 27
+
+    filler:
+      enabled: true
+      material: "BLACK_STAINED_GLASS_PANE"
+      name: " "
+      lore: []
+      custom_model_data: 0
+      hide_attributes: true
+
+    static-items:
+      info:
+        enabled: true
+        slot: 4
+        material: "BOOK"
+        name: "&6&lINFORMAÇÕES"
+        lore:
+          - ""
+          - "&7Escolha um desafio em party."
+        hide_attributes: true
+
+    leave:
+      enabled: true
+      slot: 22
+      material: "BARRIER"
+      name: "&c&lSAIR"
+      lore:
+        - "&7Clique para fechar."
+      hide_attributes: true
+
+    dungeon-slots:
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+
+    dungeon-item:
+      material: "ENDER_EYE"
+      amount: 1
+      name: "&e&l{display}"
+      lore:
+        - ""
+        - "&7Modo: &f{mode}"
+        - "&7Andares: &f{max_floors}"
+        - ""
+        - "&eClique para entrar!"
+      custom_model_data: 0
+      hide_attributes: true

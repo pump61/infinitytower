@@ -1,0 +1,27 @@
+name: InfinityTower
+version: 1.0
+main: com.eternity.infinitytower.InfinityTower
+api-version: 1.21
+author: Eternity
+depend: [PlaceholderAPI]
+softdepend: [MythicMobs, Citizens, Essentials]
+
+commands:
+  tower:
+    description: Comando principal da InfinityTower
+    usage: /tower
+    aliases: [torre]
+
+permissions:
+  infinitytower.player:
+    description: Permite usar comandos básicos (invite/accept/leave/help)
+    default: true
+  infinitytower.admin:
+    description: Permite comandos administrativos (admin/menu/reload/create)
+    default: op
+  infinitytower.*:
+    description: Permite tudo da InfinityTower
+    default: op
+    children:
+      infinitytower.admin: true
+      infinitytower.player: true

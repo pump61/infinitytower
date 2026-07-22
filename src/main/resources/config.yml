@@ -1,0 +1,153 @@
+# =====================================================
+# InfinityTower - Configuração Global
+# =====================================================
+lang: pt-BR
+prefix: "&bInfinityTower &8» "
+# =====================================================
+# Configurações de Titles
+# =====================================================
+tower:
+
+  title_times:
+
+    # Tempo de fade-in (ticks)
+    fade_in_ticks: 10
+
+    # Tempo que o title fica visível (ticks)
+    stay_ticks: 60
+
+    # Tempo de fade-out (ticks)
+    fade_out_ticks: 10
+
+
+  # =====================================================
+  # Sistema de rastreamento de mobs
+  # =====================================================
+  tracking:
+
+    # Raio em blocos onde mobs invocados serão rastreados
+    # Isso é usado para capturar minions do MythicMobs (ex: SkeletonKing)
+    spawn_radius: 30
+
+dungeon:
+  command_whitelist:
+    - "g"
+    - "l"
+    - "."
+    - "tell"
+    - "r"
+
+  # =========================
+  # MENU PRINCIPAL (27 SLOTS)
+  # =========================
+main-menu:
+  title: "&bInfinity Tower"
+  size: 27
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    lore: []
+    custom_model_data: 0
+
+  buttons:
+    solo:
+      slot: 12
+      material: DIAMOND_SWORD
+      name: "&a&lDUNGEON SOLO"
+      lore:
+        - "&7Clique para jogar sozinho."
+      custom_model_data: 0
+    party:
+      slot: 14
+      material: GOLDEN_SWORD
+      name: "&6&lDUNGEON PARTY"
+      lore:
+        - "&7Clique para jogar com sua party."
+      custom_model_data: 0
+
+stats-menu:
+  title: "&#00FF7F&lSUAS ESTATÍSTICAS"
+  size: 27
+
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    lore: []
+    custom_model_data: 0
+
+  player:
+    slot: 4
+    name: "&#FFD700&l{player}"
+    lore:
+      - ""
+      - "&7UUID: &f{uuid}"
+      - "&7Runs Totais: &f{total_runs}"
+      - "&7Vitórias Totais: &a{total_wins}"
+      - "&7Derrotas Totais: &c{total_losses}"
+
+  solo:
+    slot: 12
+    material: DIAMOND_SWORD
+    name: "&#00FF7F&lTORRE SOLO"
+    lore:
+      - ""
+      - "&7Runs: &f{solo_runs}"
+      - "&7Vitórias: &a{solo_wins}"
+      - "&7Derrotas: &c{solo_losses}"
+    custom_model_data: 0
+
+  party:
+    slot: 14
+    material: GOLDEN_SWORD
+    name: "&#FFD700&lTORRE PARTY"
+    lore:
+      - ""
+      - "&7Runs: &f{party_runs}"
+      - "&7Vitórias: &a{party_wins}"
+      - "&7Derrotas: &c{party_losses}"
+    custom_model_data: 0
+
+
+# =====================================================
+# Spawn global fallback (caso dungeon não tenha return_spawn)
+# =====================================================
+spawn:
+
+  world: world
+
+  x: 0.5
+  y: 100.0
+  z: 0.5
+
+  yaw: 0.0
+  pitch: 0.0
+
+
+# =====================================================
+# Sistema de banco de dados
+# =====================================================
+database:
+  enabled: true     # coloque true quando for usar MySQL
+  type: sqlite       # sqlite ou mysql
+  sqlite:
+    file: "database.db"
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "infinitytower"
+    user: "root"
+    password: ""
+    useSSL: false
+
+  # ✅ NOVO: delay global antes de teleportar o player pra arena
+  # (serve para dar tempo de carregar chunks / preparar HUD / etc)
+  enter_teleport_delay_seconds: 3
+
+# =====================================================
+# Sistema de Debug
+# =====================================================
+debug:
+
+  enabled: false
