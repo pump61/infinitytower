@@ -206,3 +206,4 @@ logs:
     database_record_failed: "recordRunToDatabase falhou: {err}"
     reward_invalid_item: "Reward item inválido: {item} (floor {floor})"
     equipment_invalid_item: "Equipamento inválido: {item} (slot {slot}, mob {mob})"
+    equipment_invalid_enchantment: "Encantamento inválido: {enchant} (slot {slot}, mob {mob})"

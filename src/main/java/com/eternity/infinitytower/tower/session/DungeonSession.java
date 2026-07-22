@@ -8,6 +8,7 @@ import com.eternity.infinitytower.util.TextUtil;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.EntityEquipment;
@@ -784,17 +785,57 @@ public final class DungeonSession {
         Object raw = equipMap.get(slot);
         if (raw == null) return;
 
-        String materialName = String.valueOf(raw);
+        // aceita tanto "slot: MATERIAL" quanto "slot: { material: MATERIAL, enchantments: {...} }"
+        String materialName;
+        Map<?, ?> enchantments = null;
+
+        if (raw instanceof Map<?, ?> slotMap) {
+            Object matObj = slotMap.get("material");
+            materialName = matObj == null ? null : String.valueOf(matObj);
+
+            Object enchObj = slotMap.get("enchantments");
+            if (enchObj instanceof Map<?, ?> em) enchantments = em;
+        } else {
+            materialName = String.valueOf(raw);
+        }
+
+        if (materialName == null || materialName.isBlank()) return;
 
         try {
             Material mat = Material.valueOf(materialName.toUpperCase(Locale.ROOT));
-            setter.accept(new ItemStack(mat));
+            ItemStack stack = new ItemStack(mat);
+            applyEnchantments(stack, enchantments, slot, vanillaType);
+            setter.accept(stack);
         } catch (Exception ex) {
             plugin.getLogger().warning(log(
                     "dungeon.equipment_invalid_item",
                     "Equipamento inválido: {item} (slot {slot}, mob {mob})",
                     Map.of("item", materialName, "slot", slot, "mob", String.valueOf(vanillaType))
             ));
+        }
+    }
+
+    private void applyEnchantments(ItemStack stack, Map<?, ?> enchantments, String slot, String vanillaType) {
+        if (enchantments == null || enchantments.isEmpty()) return;
+
+        for (var e : enchantments.entrySet()) {
+            String enchName = String.valueOf(e.getKey()).toLowerCase(Locale.ROOT);
+
+            int level = 1;
+            if (e.getValue() instanceof Number n) level = n.intValue();
+            if (level < 1) level = 1;
+
+            Enchantment ench = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(enchName));
+            if (ench == null) {
+                plugin.getLogger().warning(log(
+                        "dungeon.equipment_invalid_enchantment",
+                        "Encantamento inválido: {enchant} (slot {slot}, mob {mob})",
+                        Map.of("enchant", enchName, "slot", slot, "mob", String.valueOf(vanillaType))
+                ));
+                continue;
+            }
+
+            stack.addUnsafeEnchantment(ench, level);
         }
     }
 

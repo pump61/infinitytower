@@ -67,8 +67,13 @@ floors:
       - type: ZOMBIE
         amount: 3
         # equipment: opcional, só vale para mobs vanilla (type). Slots: hand, offhand, helmet, chestplate, leggings, boots
+        # cada slot aceita "MATERIAL" simples ou { material: MATERIAL, enchantments: { nome: nivel } }
         equipment:
-          hand: IRON_SWORD
+          hand:
+            material: IRON_SWORD
+            enchantments:
+              sharpness: 3
+              fire_aspect: 1
           helmet: IRON_HELMET
           chestplate: IRON_CHESTPLATE
           leggings: IRON_LEGGINGS

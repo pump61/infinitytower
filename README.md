@@ -189,7 +189,11 @@ floors:
       - type: ZOMBIE
         amount: 3
         equipment:
-          hand: IRON_SWORD
+          hand:
+            material: IRON_SWORD
+            enchantments:
+              sharpness: 3
+              fire_aspect: 1
           helmet: IRON_HELMET
           chestplate: IRON_CHESTPLATE
           leggings: IRON_LEGGINGS
@@ -212,7 +216,21 @@ floors:
 | `leggings` | Calça |
 | `boots` | Botas |
 
-O valor de cada slot é o nome de um `Material` válido (ex.: `DIAMOND_SWORD`, `NETHERITE_CHESTPLATE`). Um slot com material inválido é ignorado (loga `dungeon.equipment_invalid_item`) sem afetar os demais. O equipamento configurado **não dropa** quando o mob morre (drop chance forçado para 0 em todos os slots usados).
+Cada slot aceita dois formatos:
+
+- **Simples** — só o material: `hand: DIAMOND_SWORD`.
+- **Com encantamentos** — um mapa com `material` e `enchantments`:
+  ```yaml
+  hand:
+    material: DIAMOND_SWORD
+    enchantments:
+      sharpness: 5
+      unbreaking: 3
+  ```
+
+`material` é o nome de um `Material` válido (ex.: `DIAMOND_SWORD`, `NETHERITE_CHESTPLATE`). `enchantments` é um mapa `nome_do_encantamento: nível`, onde o nome é a chave vanilla em minúsculo (ex.: `sharpness`, `protection`, `unbreaking`, `fire_aspect`, `knockback`) — os mesmos nomes usados no `/enchant` do Minecraft. Os níveis não são limitados ao máximo vanilla (equivalente a um encantamento "unsafe": dá pra colocar `sharpness: 10`, por exemplo).
+
+Um slot com material ou encantamento inválido é ignorado individualmente (loga `dungeon.equipment_invalid_item` / `dungeon.equipment_invalid_enchantment`) sem afetar os demais. O equipamento configurado **não dropa** quando o mob morre (drop chance forçado para 0 em todos os slots usados).
 
 **Mob do MythicMobs** — use `mythic` com o nome interno exato do mob (o mesmo definido nos arquivos de config do MythicMobs, ex.: `mythicmobs/Mobs/*.yml`):
 
