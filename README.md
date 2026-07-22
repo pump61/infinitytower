@@ -188,12 +188,31 @@ floors:
     mobs:
       - type: ZOMBIE
         amount: 3
+        equipment:
+          hand: IRON_SWORD
+          helmet: IRON_HELMET
+          chestplate: IRON_CHESTPLATE
+          leggings: IRON_LEGGINGS
+          boots: IRON_BOOTS
         spawns:
           - world: world
             x: 0.5
             y: 100.0
             z: 0.5
 ```
+
+`equipment` é **opcional** e só se aplica a mobs `type` (vanilla) — o MythicMobs já tem seu próprio sistema de equipamento. Slots aceitos, todos opcionais e independentes:
+
+| Slot | Equivalente |
+|---|---|
+| `hand` | Item na mão principal (ex.: uma espada) |
+| `offhand` | Item na mão secundária (ex.: um escudo) |
+| `helmet` | Capacete |
+| `chestplate` | Peitoral |
+| `leggings` | Calça |
+| `boots` | Botas |
+
+O valor de cada slot é o nome de um `Material` válido (ex.: `DIAMOND_SWORD`, `NETHERITE_CHESTPLATE`). Um slot com material inválido é ignorado (loga `dungeon.equipment_invalid_item`) sem afetar os demais. O equipamento configurado **não dropa** quando o mob morre (drop chance forçado para 0 em todos os slots usados).
 
 **Mob do MythicMobs** — use `mythic` com o nome interno exato do mob (o mesmo definido nos arquivos de config do MythicMobs, ex.: `mythicmobs/Mobs/*.yml`):
 

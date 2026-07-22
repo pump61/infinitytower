@@ -66,6 +66,13 @@ floors:
     mobs:
       - type: ZOMBIE
         amount: 3
+        # equipment: opcional, só vale para mobs vanilla (type). Slots: hand, offhand, helmet, chestplate, leggings, boots
+        equipment:
+          hand: IRON_SWORD
+          helmet: IRON_HELMET
+          chestplate: IRON_CHESTPLATE
+          leggings: IRON_LEGGINGS
+          boots: IRON_BOOTS
         spawns:
           - world: world
             x: 0.5

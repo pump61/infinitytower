@@ -10,10 +10,12 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 
 public final class DungeonSession {
 
@@ -697,6 +699,7 @@ public final class DungeonSession {
 
                     LivingEntity spawned = spawnVanillaMob(vanillaType, loc);
                     if (spawned != null) {
+                        applyVanillaEquipment(spawned, mobEntry, vanillaType);
                         trackMob(spawned);
                         tracked++;
                     }
@@ -747,6 +750,51 @@ public final class DungeonSession {
                     )
             ));
             return null;
+        }
+    }
+
+    // =========================
+    // EQUIPAMENTO (MOBS VANILLA)
+    // =========================
+
+    private void applyVanillaEquipment(LivingEntity entity, Map<?, ?> mobEntry, String vanillaType) {
+        Object equipObj = mobEntry.get("equipment");
+        if (!(equipObj instanceof Map<?, ?> equipMap)) return;
+
+        EntityEquipment eq = entity.getEquipment();
+        if (eq == null) return;
+
+        setEquipmentSlot(eq, equipMap, "hand", vanillaType, eq::setItemInMainHand);
+        setEquipmentSlot(eq, equipMap, "offhand", vanillaType, eq::setItemInOffHand);
+        setEquipmentSlot(eq, equipMap, "helmet", vanillaType, eq::setHelmet);
+        setEquipmentSlot(eq, equipMap, "chestplate", vanillaType, eq::setChestplate);
+        setEquipmentSlot(eq, equipMap, "leggings", vanillaType, eq::setLeggings);
+        setEquipmentSlot(eq, equipMap, "boots", vanillaType, eq::setBoots);
+
+        // não dropa o equipamento configurado quando o mob morre
+        eq.setItemInMainHandDropChance(0f);
+        eq.setItemInOffHandDropChance(0f);
+        eq.setHelmetDropChance(0f);
+        eq.setChestplateDropChance(0f);
+        eq.setLeggingsDropChance(0f);
+        eq.setBootsDropChance(0f);
+    }
+
+    private void setEquipmentSlot(EntityEquipment eq, Map<?, ?> equipMap, String slot, String vanillaType, Consumer<ItemStack> setter) {
+        Object raw = equipMap.get(slot);
+        if (raw == null) return;
+
+        String materialName = String.valueOf(raw);
+
+        try {
+            Material mat = Material.valueOf(materialName.toUpperCase(Locale.ROOT));
+            setter.accept(new ItemStack(mat));
+        } catch (Exception ex) {
+            plugin.getLogger().warning(log(
+                    "dungeon.equipment_invalid_item",
+                    "Equipamento inválido: {item} (slot {slot}, mob {mob})",
+                    Map.of("item", materialName, "slot", slot, "mob", String.valueOf(vanillaType))
+            ));
         }
     }
 
