@@ -343,6 +343,8 @@ Configurando pelo comando (mais prático que editar o YAML na mão):
 
 Cada `floors.<n>.mobs[].spawns` daquele andar deve ficar, claro, dentro da arena física correspondente ao `floor_spawn` do mesmo andar — do contrário os mobs spawnam num lugar e os jogadores ficam em outro. `floor_spawn` também respeita [arenas alternativas](#arenas-alternativas-e-dungeons-extra): configure `/tower admin setup <dungeonId> <arena>` antes de rodar `setfloorspawn` pra editar a arena certa.
 
+> **Já vem ativo nos templates padrão** (`solo_10.yml`/`party_10.yml`): os 10 andares alternam entre "arena A" (`-47.5, 167, 45.5` — o `player_spawns`/`return_spawn` de sempre) e "arena B" (`0.5, 100, 0.5` — coordenada de exemplo, reaproveitando um ponto que já existia no arquivo). São coordenadas ilustrativas pra você ver o recurso funcionando; troque pelas arenas de verdade que você construir usando `/tower admin setfloorspawn <floor>`, e ajuste `floors.<n>.mobs[].spawns` de cada andar pra combinar.
+
 #### Configuração de mobs: vanilla vs MythicMobs
 
 Cada entrada de `floors.<n>.mobs` é **um** dos dois formatos abaixo (`type` para mob vanilla, `mythic` para MythicMobs). Se ambos os campos aparecerem na mesma entrada, `mythic` tem prioridade e `type` é ignorado — então nunca misture os dois, use um ou outro (código: [`DungeonSession.spawnFloorMobs`](src/main/java/com/eternity/infinitytower/tower/session/DungeonSession.java#L644-L720)).

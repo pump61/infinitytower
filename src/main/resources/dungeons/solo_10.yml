@@ -64,22 +64,20 @@ titles:
 floors:
   # floors.<n>.floor_spawn (opcional, em qualquer andar): teleporta o(s) jogador(es)
   # pra um local diferente só nesse andar, em vez de manter o spawn de entrada.
-  # Serve pra simular "subir de andar" trocando de sala/arena fisicamente:
-  # ex. andar 1 numa arena, andar 2 em outra, andar 3 de volta na primeira, etc.
-  # Usa o mesmo formato de "return_spawn". Configure com:
+  # Serve pra simular "subir de andar" trocando de sala/arena fisicamente.
+  # Usa o mesmo formato de "return_spawn". Pra reconfigurar com coordenadas reais:
   #   /tower admin setup solo_10
   #   /tower admin setfloorspawn <floor>   (fica em pé no local e roda)
   #   /tower admin save
   #
-  # Exemplo (comentado — descomente e ajuste as coordenadas pra ativar):
-  # 1:
-  #   floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }
-  # 2:
-  #   floor_spawn: { world: world, x: 0.5, y: 100.0, z: 100.5 }   # "arena 2"
-  # 3:
-  #   floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }     # volta pra "arena 1"
+  # ATIVADO ABAIXO como exemplo, alternando entre 2 pontos que já existiam
+  # neste arquivo ("arena A" = spawn/return_spawn de sempre; "arena B" = onde
+  # os mobs dos andares 2-10 já spawnavam) — são coordenadas de EXEMPLO,
+  # ajuste pras arenas reais que você construir (e ajuste também
+  # floors.<n>.mobs[].spawns de cada andar pra combinar com o floor_spawn dele).
 
   1:
+    floor_spawn: { world: world, x: -47.5, y: 167.0, z: 45.5 }   # "arena A"
     mobs:
       - type: ZOMBIE
         amount: 3
@@ -126,6 +124,7 @@ floors:
           amount: 1
 
   2:
+    floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }   # "arena B"
     mobs:
       - mythic: SkeletalKnight
         amount: 3
@@ -140,6 +139,7 @@ floors:
         - "give {player} emerald 2"
 
   3:
+    floor_spawn: { world: world, x: -47.5, y: 167.0, z: 45.5 }   # "arena A"
     mobs:
       - mythic: SkeletonKing
         amount: 1
@@ -154,6 +154,7 @@ floors:
         - "give {player} diamond 5"
 
   4:
+    floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }   # "arena B"
     mobs:
       - mythic: SkeletalKnight
         amount: 5
@@ -168,6 +169,7 @@ floors:
         - "give {player} diamond 5"
 
   5:
+    floor_spawn: { world: world, x: -47.5, y: 167.0, z: 45.5 }   # "arena A"
     mobs:
       - mythic: SkeletalKnight
         amount: 6
@@ -182,6 +184,7 @@ floors:
         - "give {player} diamond 5"
 
   6:
+    floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }   # "arena B"
     mobs:
       - mythic: SkeletalKnight
         amount: 7
@@ -196,6 +199,7 @@ floors:
         - "give {player} diamond 5"
 
   7:
+    floor_spawn: { world: world, x: -47.5, y: 167.0, z: 45.5 }   # "arena A"
     mobs:
       - mythic: SkeletalKnight
         amount: 8
@@ -210,6 +214,7 @@ floors:
         - "give {player} diamond 5"
 
   8:
+    floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }   # "arena B"
     mobs:
       - mythic: SkeletalKnight
         amount: 9
@@ -224,6 +229,7 @@ floors:
         - "give {player} diamond 5"
 
   9:
+    floor_spawn: { world: world, x: -47.5, y: 167.0, z: 45.5 }   # "arena A"
     mobs:
       - mythic: SkeletalKnight
         amount: 10
@@ -238,6 +244,7 @@ floors:
         - "give {player} diamond 5"
 
   10:
+    floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }   # "arena B"
     mobs:
       - mythic: SkeletonKing
         amount: 1
