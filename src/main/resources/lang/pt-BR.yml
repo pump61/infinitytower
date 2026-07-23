@@ -159,35 +159,39 @@ database:
   disconnected: "&7Banco desconectado."
 
 setup:
-  canceled: "&cSetup cancelado."
+  only_players: "&cApenas jogadores podem usar setup."
+  usage_setup: "&cUse: &f/tower admin setup <dungeonId> [arena]"
   dungeon_not_found: "&cDungeon não encontrada: &f{dungeon}"
-  started: "&aSetup iniciado em &f{dungeon} &7| arena &f{arena}"
-  hint_save: "&7Use &f/tower admin setup save &7para salvar."
+  started: "&aSetup iniciado: &f{dungeon} &7(arena {arena})"
+  hint_setspawn: "&7Use: &f/tower admin setspawn solo|leader &7| &f/tower admin addspawn members|solo"
+  hint_mobspawn: "&7Use: &f/tower admin mobspawn add|set|clear <floor> &7| &f/tower admin setreturn"
+  hint_save: "&7Finalize: &f/tower admin save &7ou &f/tower admin cancel"
   not_in_setup: "&cVocê não está em setup. Use: &f/tower admin setup <dungeonId> [arena]"
-  arena_selected: "&aArena selecionada: &f{arena}"
+  where_current: "&aSetup atual: &f{dungeon} &7(arena {arena})"
+  canceled: "&eSetup cancelado (não salvou)."
 
-  solo_spawn_set: "&aSpawn SOLO definido (player_spawns = 1)"
-  solo_spawn_added: "&aSpawn SOLO adicionado. Total: &f{total}"
-  solo_spawns_cleared: "&aSpawns SOLO limpos."
-  solo_list_header: "&eSpawns SOLO (&f{total}&e):"
-  solo_list_item: "&7- &f{i}&7) &a{loc}"
+  solo_spawn_set: "&aSpawn SOLO setado. &7({loc})"
+  solo_spawn_added: "&aSpawn SOLO adicionado. &7({loc}) &7Total: &f{total}"
+  solo_spawns_cleared: "&eSpawns SOLO limpos."
 
-  party_leader_set: "&aSpawn do líder definido."
-  party_member_added: "&aSpawn de membro adicionado. Total: &f{total}"
-  party_members_cleared: "&aSpawns de membros limpos."
-  party_list_header: "&eParty spawns:"
-  party_leader_value: "&7- &eLeader: &a{loc}"
-  party_leader_missing: "&7- &eLeader: &c(não definido)"
-  party_members_header: "&7- &eMembers (&f{total}&e):"
-  party_members_item: "&7  • &f{i}&7) &a{loc}"
+  party_leader_set: "&aSpawn do LEADER setado. &7({loc})"
+  party_member_added: "&aSpawn MEMBERS adicionado. &7({loc}) &7Total: &f{total}"
+  party_members_cleared: "&eSpawns MEMBERS limpos."
 
-  return_set: "&aReturn spawn definido."
-  return_missing: "&creturn_spawn não definido."
-  return_value: "&eReturn: &a{loc}"
+  usage_setspawn: "&cUse: &f/tower admin setspawn <solo|leader>"
+  usage_addspawn: "&cUse: &f/tower admin addspawn <solo|members>"
+  usage_clearspawns: "&cUse: &f/tower admin clearspawns <solo|members>"
+  usage_mobspawn: "&cUse: &f/tower admin mobspawn <add|set|clear> <floor>"
+
+  return_set: "&aReturn spawn setado. &7({loc})"
+
+  floor_invalid: "&cFloor inválido."
+  mobspawn_no_mobs: "&cEsse andar não tem mobs configurados ainda (&f{floor}&c)."
+  mobspawn_updated: "&aMob spawns atualizados no floor &f{floor}&a: &f{total} &aponto(s)."
 
   save_not_in_setup: "&cVocê não está em setup."
-  save_failed: "&cFalha ao salvar dungeon."
-  saved_and_reloaded: "&aDungeon salva e recarregada: &f{dungeon}"
+  save_failed: "&cFalha ao salvar: &f{error}"
+  saved_and_reloaded: "&aSetup salvo e dungeons recarregadas."
 
 logs:
   main_menu:
@@ -197,10 +201,6 @@ logs:
     button_solo_missing: "[MainMenu] Seção não encontrada: main-menu.buttons.solo"
     button_party_missing: "[MainMenu] Seção não encontrada: main-menu.buttons.party"
 
-  playerdata:
-    load_failed: "Falha ao carregar PlayerData de {uuid}: {error}"
-    save_failed: "Falha ao salvar PlayerData de {uuid}: {error}"
-
   dungeon:
     vanilla_mob_invalid: "Mob vanilla inválido: {mob} (dungeon {dungeon}, floor {floor})"
     mythic_missing: "MythicMobs não instalado, mas pediu mythic: {mob}"
@@ -209,3 +209,7 @@ logs:
     reward_invalid_item: "Reward item inválido: {item} (floor {floor})"
     equipment_invalid_item: "Equipamento inválido: {item} (slot {slot}, mob {mob})"
     equipment_invalid_enchantment: "Encantamento inválido: {enchant} (slot {slot}, mob {mob})"
+
+menus:
+  main:
+    title_fallback: "&bInfinity Tower"

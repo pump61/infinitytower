@@ -674,24 +674,24 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
 
                     case "setup" -> {
                         if (!(sender instanceof Player p)) {
-                            sender.sendMessage("&cApenas jogadores podem usar setup.");
+                            sender.sendMessage(lang("setup.only_players", "&cApenas jogadores podem usar setup."));
                             return true;
                         }
                         if (args.length < 3) {
-                            p.sendMessage("&cUse: &f/tower admin setup <dungeonId> [arena]");
+                            p.sendMessage(lang("setup.usage_setup", "&cUse: &f/tower admin setup <dungeonId> [arena]"));
                             return true;
                         }
 
                         String dungeonId = args[2].trim().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_\\-]", "");
                         if (dungeonId.isBlank()) {
-                            p.sendMessage("&cID inválido.");
+                            p.sendMessage(lang("messages.invalid_id", "&cID inválido."));
                             return true;
                         }
 
                         File dungeonsFolder = new File(plugin.getDataFolder(), "dungeons");
                         File file = new File(dungeonsFolder, dungeonId + ".yml");
                         if (!file.exists()) {
-                            p.sendMessage(apply(lang("messages.dungeon_not_found", "&cDungeon não encontrada: &f{dungeon}"),
+                            p.sendMessage(apply(lang("setup.dungeon_not_found", "&cDungeon não encontrada: &f{dungeon}"),
                                     Map.of("{dungeon}", dungeonId)));
                             return true;
                         }
@@ -715,10 +715,11 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
 
                         setups.put(p.getUniqueId(), new SetupContext(dungeonId, arena, prefix, file, cfg));
 
-                        p.sendMessage(TextUtil.color("&aSetup iniciado: &f" + dungeonId + " &7(arena " + arena + ")"));
-                        p.sendMessage(TextUtil.color("&7Use: &f/tower admin setspawn solo|leader &7| &f/tower admin addspawn members|solo"));
-                        p.sendMessage(TextUtil.color("&7Use: &f/tower admin mobspawn add|set|clear <floor> &7| &f/tower admin setreturn"));
-                        p.sendMessage(TextUtil.color("&7Finalize: &f/tower admin save &7ou &f/tower admin cancel"));
+                        p.sendMessage(apply(lang("setup.started", "&aSetup iniciado: &f{dungeon} &7(arena {arena})"),
+                                Map.of("{dungeon}", dungeonId, "{arena}", String.valueOf(arena))));
+                        p.sendMessage(lang("setup.hint_setspawn", "&7Use: &f/tower admin setspawn solo|leader &7| &f/tower admin addspawn members|solo"));
+                        p.sendMessage(lang("setup.hint_mobspawn", "&7Use: &f/tower admin mobspawn add|set|clear <floor> &7| &f/tower admin setreturn"));
+                        p.sendMessage(lang("setup.hint_save", "&7Finalize: &f/tower admin save &7ou &f/tower admin cancel"));
                         return true;
                     }
 
@@ -726,19 +727,20 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         if (!(sender instanceof Player p)) return true;
                         SetupContext sc = setups.get(p.getUniqueId());
                         if (sc == null) {
-                            p.sendMessage("&cVocê não está em setup. Use: &f/tower admin setup <dungeonId> [arena]");
+                            p.sendMessage(lang("setup.not_in_setup", "&cVocê não está em setup. Use: &f/tower admin setup <dungeonId> [arena]"));
                             return true;
                         }
-                        p.sendMessage(TextUtil.color("&aSetup atual: &f" + sc.dungeonId + " &7(arena " + sc.arenaIndex + ")"));
+                        p.sendMessage(apply(lang("setup.where_current", "&aSetup atual: &f{dungeon} &7(arena {arena})"),
+                                Map.of("{dungeon}", sc.dungeonId, "{arena}", String.valueOf(sc.arenaIndex))));
                         return true;
                     }
 
                     case "cancel" -> {
                         if (!(sender instanceof Player p)) return true;
                         if (setups.remove(p.getUniqueId()) != null) {
-                            p.sendMessage("&eSetup cancelado (não salvou).");
+                            p.sendMessage(lang("setup.canceled", "&eSetup cancelado (não salvou)."));
                         } else {
-                            p.sendMessage("&cVocê não está em setup.");
+                            p.sendMessage(lang("setup.save_not_in_setup", "&cVocê não está em setup."));
                         }
                         return true;
                     }
@@ -747,7 +749,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         if (!(sender instanceof Player p)) return true;
                         SetupContext sc = setups.get(p.getUniqueId());
                         if (sc == null) {
-                            p.sendMessage("&cVocê não está em setup.");
+                            p.sendMessage(lang("setup.save_not_in_setup", "&cVocê não está em setup."));
                             return true;
                         }
 
@@ -755,9 +757,10 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                             sc.cfg.save(sc.file);
                             plugin.getDungeonRegistry().reload();
                             setups.remove(p.getUniqueId());
-                            p.sendMessage("&aSetup salvo e dungeons recarregadas.");
+                            p.sendMessage(lang("setup.saved_and_reloaded", "&aSetup salvo e dungeons recarregadas."));
                         } catch (Exception e) {
-                            p.sendMessage("&cFalha ao salvar: &f" + e.getMessage());
+                            p.sendMessage(apply(lang("setup.save_failed", "&cFalha ao salvar: &f{error}"),
+                                    Map.of("{error}", String.valueOf(e.getMessage()))));
                         }
                         return true;
                     }
@@ -766,12 +769,13 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         if (!(sender instanceof Player p)) return true;
                         SetupContext sc = setups.get(p.getUniqueId());
                         if (sc == null) {
-                            p.sendMessage("&cVocê não está em setup.");
+                            p.sendMessage(lang("setup.save_not_in_setup", "&cVocê não está em setup."));
                             return true;
                         }
 
                         setLocationSection(sc.cfg, sc.prefix + "return_spawn", p.getLocation());
-                        p.sendMessage(TextUtil.color("&aReturn spawn setado. &7(" + fmt(p.getLocation()) + ")"));
+                        p.sendMessage(apply(lang("setup.return_set", "&aReturn spawn setado. &7({loc})"),
+                                Map.of("{loc}", fmt(p.getLocation()))));
                         return true;
                     }
 
@@ -779,12 +783,12 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         if (!(sender instanceof Player p)) return true;
                         SetupContext sc = setups.get(p.getUniqueId());
                         if (sc == null) {
-                            p.sendMessage("&cVocê não está em setup.");
+                            p.sendMessage(lang("setup.save_not_in_setup", "&cVocê não está em setup."));
                             return true;
                         }
 
                         if (args.length < 3) {
-                            p.sendMessage("&cUse: &f/tower admin setspawn <solo|leader>");
+                            p.sendMessage(lang("setup.usage_setspawn", "&cUse: &f/tower admin setspawn <solo|leader>"));
                             return true;
                         }
 
@@ -794,17 +798,19 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                             List<Map<String, Object>> list = new ArrayList<>();
                             list.add(locMap(p.getLocation()));
                             sc.cfg.set(sc.prefix + "player_spawns", list);
-                            p.sendMessage(TextUtil.color("&aSpawn SOLO setado. &7(" + fmt(p.getLocation()) + ")"));
+                            p.sendMessage(apply(lang("setup.solo_spawn_set", "&aSpawn SOLO setado. &7({loc})"),
+                                    Map.of("{loc}", fmt(p.getLocation()))));
                             return true;
                         }
 
                         if (which.equals("leader")) {
                             setLocationSection(sc.cfg, sc.prefix + "party_leader_spawn", p.getLocation());
-                            p.sendMessage(TextUtil.color("&aSpawn do LEADER setado. &7(" + fmt(p.getLocation()) + ")"));
+                            p.sendMessage(apply(lang("setup.party_leader_set", "&aSpawn do LEADER setado. &7({loc})"),
+                                    Map.of("{loc}", fmt(p.getLocation()))));
                             return true;
                         }
 
-                        p.sendMessage("&cUse: &f/tower admin setspawn <solo|leader>");
+                        p.sendMessage(lang("setup.usage_setspawn", "&cUse: &f/tower admin setspawn <solo|leader>"));
                         return true;
                     }
 
@@ -812,12 +818,12 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         if (!(sender instanceof Player p)) return true;
                         SetupContext sc = setups.get(p.getUniqueId());
                         if (sc == null) {
-                            p.sendMessage("&cVocê não está em setup.");
+                            p.sendMessage(lang("setup.save_not_in_setup", "&cVocê não está em setup."));
                             return true;
                         }
 
                         if (args.length < 3) {
-                            p.sendMessage("&cUse: &f/tower admin addspawn <solo|members>");
+                            p.sendMessage(lang("setup.usage_addspawn", "&cUse: &f/tower admin addspawn <solo|members>"));
                             return true;
                         }
 
@@ -829,7 +835,8 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                             for (Map<?, ?> m : raw) list.add(new HashMap<>((Map<String, Object>) m));
                             list.add(locMap(p.getLocation()));
                             sc.cfg.set(sc.prefix + "player_spawns", list);
-                            p.sendMessage(TextUtil.color("&aSpawn SOLO adicionado. &7(" + fmt(p.getLocation()) + ")"));
+                            p.sendMessage(apply(lang("setup.solo_spawn_added", "&aSpawn SOLO adicionado. &7({loc}) &7Total: &f{total}"),
+                                    Map.of("{loc}", fmt(p.getLocation()), "{total}", String.valueOf(list.size()))));
                             return true;
                         }
 
@@ -839,11 +846,12 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                             for (Map<?, ?> m : raw) list.add(new HashMap<>((Map<String, Object>) m));
                             list.add(locMap(p.getLocation()));
                             sc.cfg.set(sc.prefix + "party_member_spawns", list);
-                            p.sendMessage(TextUtil.color("&aSpawn MEMBERS adicionado. &7(" + fmt(p.getLocation()) + ")"));
+                            p.sendMessage(apply(lang("setup.party_member_added", "&aSpawn MEMBERS adicionado. &7({loc}) &7Total: &f{total}"),
+                                    Map.of("{loc}", fmt(p.getLocation()), "{total}", String.valueOf(list.size()))));
                             return true;
                         }
 
-                        p.sendMessage("&cUse: &f/tower admin addspawn <solo|members>");
+                        p.sendMessage(lang("setup.usage_addspawn", "&cUse: &f/tower admin addspawn <solo|members>"));
                         return true;
                     }
 
@@ -851,12 +859,12 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         if (!(sender instanceof Player p)) return true;
                         SetupContext sc = setups.get(p.getUniqueId());
                         if (sc == null) {
-                            p.sendMessage("&cVocê não está em setup.");
+                            p.sendMessage(lang("setup.save_not_in_setup", "&cVocê não está em setup."));
                             return true;
                         }
 
                         if (args.length < 3) {
-                            p.sendMessage("&cUse: &f/tower admin clearspawns <solo|members>");
+                            p.sendMessage(lang("setup.usage_clearspawns", "&cUse: &f/tower admin clearspawns <solo|members>"));
                             return true;
                         }
 
@@ -864,17 +872,17 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
 
                         if (which.equals("solo")) {
                             sc.cfg.set(sc.prefix + "player_spawns", new ArrayList<>());
-                            p.sendMessage("&eSpawns SOLO limpos.");
+                            p.sendMessage(lang("setup.solo_spawns_cleared", "&eSpawns SOLO limpos."));
                             return true;
                         }
 
                         if (which.equals("members")) {
                             sc.cfg.set(sc.prefix + "party_member_spawns", new ArrayList<>());
-                            p.sendMessage("&eSpawns MEMBERS limpos.");
+                            p.sendMessage(lang("setup.party_members_cleared", "&eSpawns MEMBERS limpos."));
                             return true;
                         }
 
-                        p.sendMessage("&cUse: &f/tower admin clearspawns <solo|members>");
+                        p.sendMessage(lang("setup.usage_clearspawns", "&cUse: &f/tower admin clearspawns <solo|members>"));
                         return true;
                     }
 
@@ -882,12 +890,12 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         if (!(sender instanceof Player p)) return true;
                         SetupContext sc = setups.get(p.getUniqueId());
                         if (sc == null) {
-                            p.sendMessage("&cVocê não está em setup.");
+                            p.sendMessage(lang("setup.save_not_in_setup", "&cVocê não está em setup."));
                             return true;
                         }
 
                         if (args.length < 4) {
-                            p.sendMessage("&cUse: &f/tower admin mobspawn <add|set|clear> <floor>");
+                            p.sendMessage(lang("setup.usage_mobspawn", "&cUse: &f/tower admin mobspawn <add|set|clear> <floor>"));
                             return true;
                         }
 
@@ -896,7 +904,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         int floor;
                         try { floor = Integer.parseInt(args[3]); }
                         catch (Exception e) {
-                            p.sendMessage("&cFloor inválido.");
+                            p.sendMessage(lang("setup.floor_invalid", "&cFloor inválido."));
                             return true;
                         }
                         if (floor < 1) floor = 1;
@@ -905,7 +913,8 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         List<Map<?, ?>> mobs = sc.cfg.getMapList(mobsPath);
 
                         if (mobs == null || mobs.isEmpty()) {
-                            p.sendMessage("&cEsse andar não tem mobs configurados ainda (&f" + floor + "&c).");
+                            p.sendMessage(apply(lang("setup.mobspawn_no_mobs", "&cEsse andar não tem mobs configurados ainda (&f{floor}&c)."),
+                                    Map.of("{floor}", String.valueOf(floor))));
                             return true;
                         }
 
@@ -925,7 +934,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         } else if (action.equals("add")) {
                             spawns.add(locMap(p.getLocation()));
                         } else {
-                            p.sendMessage("&cUse: &f/tower admin mobspawn <add|set|clear> <floor>");
+                            p.sendMessage(lang("setup.usage_mobspawn", "&cUse: &f/tower admin mobspawn <add|set|clear> <floor>"));
                             return true;
                         }
 
@@ -940,7 +949,8 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         }
                         sc.cfg.set(mobsPath, newMobList);
 
-                        p.sendMessage(TextUtil.color("&aMob spawns atualizados no floor &f" + floor + "&a: &f" + spawns.size() + " &aponto(s)."));
+                        p.sendMessage(apply(lang("setup.mobspawn_updated", "&aMob spawns atualizados no floor &f{floor}&a: &f{total} &aponto(s)."),
+                                Map.of("{floor}", String.valueOf(floor), "{total}", String.valueOf(spawns.size()))));
                         return true;
                     }
 
