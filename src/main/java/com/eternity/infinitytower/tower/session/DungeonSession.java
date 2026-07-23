@@ -630,12 +630,62 @@ public final class DungeonSession {
             }
 
             pruneMobsSet();
+            retargetMobsIfNeeded();
 
             if (mobs.isEmpty()) {
                 FileConfiguration d = dungeon();
                 if (d != null) onFloorCleared(d);
             }
         }, 20L, 20L);
+    }
+
+    // =========================
+    // FORÇA OS MOBS A PERSEGUIREM O(S) JOGADOR(ES)
+    // =========================
+
+    /**
+     * Garante que todo mob rastreado tenha um jogador da sessão como alvo,
+     * independente da IA vanilla de detecção por distância/visão. Roda a
+     * cada segundo (junto do floor monitor) pra re-alvejar quem perdeu o
+     * alvo (ex: alvo morreu, saiu da dungeon, ou a IA vanilla limpou o target).
+     */
+    private void retargetMobsIfNeeded() {
+        for (UUID mobId : new ArrayList<>(mobs)) {
+            Entity e = Bukkit.getEntity(mobId);
+            if (!(e instanceof Mob mob)) continue;
+            if (!mob.isValid() || mob.isDead()) continue;
+
+            LivingEntity currentTarget = mob.getTarget();
+            if (currentTarget instanceof Player p && p.isOnline() && !p.isDead()
+                    && players.contains(p.getUniqueId()) && !deadThisFloor.contains(p.getUniqueId())) {
+                continue; // já tem um alvo válido da sessão
+            }
+
+            Player nearest = findNearestSessionPlayer(mob.getLocation());
+            if (nearest != null) mob.setTarget(nearest);
+        }
+    }
+
+    private Player findNearestSessionPlayer(Location from) {
+        Player best = null;
+        double bestDist = Double.MAX_VALUE;
+
+        for (UUID pid : players) {
+            if (deadThisFloor.contains(pid)) continue;
+
+            Player p = Bukkit.getPlayer(pid);
+            if (p == null || !p.isOnline()) continue;
+            if (p.getWorld() == null || from.getWorld() == null) continue;
+            if (!p.getWorld().equals(from.getWorld())) continue;
+
+            double dist = p.getLocation().distanceSquared(from);
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = p;
+            }
+        }
+
+        return best;
     }
 
     private void stopFloorMonitor() {
@@ -927,6 +977,12 @@ public final class DungeonSession {
     private void trackMob(LivingEntity entity) {
         entity.addScoreboardTag(TAG_PREFIX + sessionId.toString());
         mobs.add(entity.getUniqueId());
+
+        // ✅ já nasce perseguindo alguém da sessão, em vez de esperar a IA vanilla notar o player
+        if (entity instanceof Mob mob) {
+            Player nearest = findNearestSessionPlayer(entity.getLocation());
+            if (nearest != null) mob.setTarget(nearest);
+        }
     }
 
     // =========================
