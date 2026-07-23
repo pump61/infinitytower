@@ -420,7 +420,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
 
             case "top" -> {
                 if (args.length < 3) {
-                    sender.sendMessage(lang("usage.top", "&cUse: &f/tower top <wins|time> <dungeonId> [limit]"));
+                    sender.sendMessage(lang("usage.top", "&cUse: &f/tower top <wins|time|floor> <dungeonId> [limit]"));
                     return true;
                 }
 
@@ -496,7 +496,30 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                sender.sendMessage(lang("usage.top", "&cUse: &f/tower top <wins|time> <dungeonId> [limit]"));
+                if (type.equals("floor")) {
+                    var top = rm.getTopBestFloor(dungeonId, limit);
+
+                    sender.sendMessage(apply(lang("messages.top_floor_header",
+                                    "&a&lTOP ANDAR &7- &f{display} &7(&f{dungeon}&7)"),
+                            Map.of("{display}", display, "{dungeon}", dungeonId)));
+
+                    if (top.isEmpty()) {
+                        sender.sendMessage(lang("messages.no_records", "&7Nenhum registro ainda."));
+                        return true;
+                    }
+
+                    int pos = 1;
+                    for (var e : top) {
+                        String name = rm.nameOf(e.uuid());
+                        sender.sendMessage(apply(lang("messages.top_floor_line",
+                                        "&f#{pos} &a{name} &7- &f andar {floor}"),
+                                Map.of("{pos}", String.valueOf(pos), "{name}", name, "{floor}", String.valueOf(e.value()))));
+                        pos++;
+                    }
+                    return true;
+                }
+
+                sender.sendMessage(lang("usage.top", "&cUse: &f/tower top <wins|time|floor> <dungeonId> [limit]"));
                 return true;
             }
 
@@ -957,7 +980,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
 
         // Dungeon
         p.sendMessage(lang("help.leave", "&f/tower leave &7- sair da dungeon"));
-        p.sendMessage(lang("help.top", "&f/tower top <wins|time> <dungeonId> [limit] &7- ranking da torre"));
+        p.sendMessage(lang("help.top", "&f/tower top <wins|time|floor> <dungeonId> [limit] &7- ranking da torre"));
         p.sendMessage(lang("help.record", "&f/tower record <dungeonId> &7- recordes (player e party)"));
 
         if (p.hasPermission("infinitytower.admin")) {
@@ -1006,7 +1029,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
         return lang("help.console",
                 "&bInfinityTower &7- console: "
                         + "&f/tower admin <reload|list|create|menu|setup|save|cancel> "
-                        + "&7| &f/tower top <wins|time> <dungeonId> [limit] "
+                        + "&7| &f/tower top <wins|time|floor> <dungeonId> [limit] "
                         + "&7| &f/tower record <dungeonId> "
                         + "&7| &f/tower give key <player> <dungeonId> [amount] "
                         + "&7| &f/tower giveall key <dungeonId> [amount]"
@@ -1068,7 +1091,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
         // ======= RESTO DO SEU TAB COMPLETE ORIGINAL (intacto) =======
 
         if (sub.equals("top")) {
-            if (args.length == 2) return filter(List.of("wins", "time"), args[1]);
+            if (args.length == 2) return filter(List.of("wins", "time", "floor"), args[1]);
 
             if (args.length == 3) {
                 List<String> ids = new ArrayList<>(plugin.getDungeonRegistry().getDungeonIds());

@@ -230,6 +230,34 @@ public final class TowerStatsRepository {
         return out;
     }
 
+    public java.util.List<com.eternity.infinitytower.manager.RankingManager.Entry> selectTopBestFloor(String dungeonId, int limit) {
+        if (db == null || !db.isConnected()) return java.util.Collections.emptyList();
+        if (dungeonId == null || dungeonId.isBlank()) return java.util.Collections.emptyList();
+
+        String sql = "SELECT uuid, best_floor FROM itower_player_dungeon " +
+                "WHERE dungeon_id = ? AND best_floor > 0 " +
+                "ORDER BY best_floor DESC, uuid ASC " +
+                "LIMIT ?";
+
+        java.util.List<com.eternity.infinitytower.manager.RankingManager.Entry> out = new java.util.ArrayList<>();
+
+        try (PreparedStatement ps = db.getConnection().prepareStatement(sql)) {
+            ps.setString(1, dungeonId);
+            ps.setInt(2, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    UUID uuid = UUID.fromString(rs.getString("uuid"));
+                    long bestFloor = rs.getLong("best_floor");
+                    out.add(new com.eternity.infinitytower.manager.RankingManager.Entry(uuid, bestFloor));
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().warning("DB selectTopBestFloor falhou: " + e.getMessage());
+        }
+
+        return out;
+    }
+
     public java.util.List<com.eternity.infinitytower.manager.RankingManager.Entry> selectTopBestTimes(String dungeonId, int limit) {
         if (db == null || !db.isConnected()) return java.util.Collections.emptyList();
         if (dungeonId == null || dungeonId.isBlank()) return java.util.Collections.emptyList();

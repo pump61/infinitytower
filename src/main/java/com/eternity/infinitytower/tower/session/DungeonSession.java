@@ -99,6 +99,12 @@ public final class DungeonSession {
     private void protectBackAfterTeleport(Player p, Location safe) {
         if (p == null || safe == null) return;
 
+        // ✅ bloqueia /back (e variações) por alguns segundos, independente de plugin instalado
+        int blockSeconds = plugin.getConfig().getInt("tower.back_block_seconds", 5);
+        if (blockSeconds > 0 && plugin.getCommandWhitelistListener() != null) {
+            plugin.getCommandWhitelistListener().blockBackFor(p, blockSeconds);
+        }
+
         final UUID pid = p.getUniqueId();
         final Location safeClone = safe.clone();
 
@@ -106,6 +112,7 @@ public final class DungeonSession {
             Player online = Bukkit.getPlayer(pid);
             if (online == null || !online.isOnline()) return;
 
+            // ✅ se o EssentialsX estiver presente, também sobrescreve o /back dele
             EssentialsBackUtil.overrideBackLocation(online, safeClone);
         }, 2L);
     }

@@ -12,6 +12,11 @@ tower:
   # (serve para dar tempo de carregar chunks / preparar HUD / etc)
   enter_teleport_delay_seconds: 3
 
+  # Segundos em que /back (e variações como /eback, /cback, essentials:back, cmi:back)
+  # ficam bloqueados depois que o player sai/termina a dungeon.
+  # Proteção extra que funciona mesmo sem EssentialsX instalado.
+  back_block_seconds: 5
+
   title_times:
 
     # Tempo de fade-in (ticks)

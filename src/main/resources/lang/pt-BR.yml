@@ -55,6 +55,8 @@ messages:
   top_wins_line: "&f#{pos} &b{name} &7- &a{wins} &7vitórias"
   top_time_header: "&d&lTOP TEMPO &7- &f{display} &7(&f{dungeon}&7)"
   top_time_line: "&f#{pos} &d{name} &7- &f{time}"
+  top_floor_header: "&a&lTOP ANDAR &7- &f{display} &7(&f{dungeon}&7)"
+  top_floor_line: "&f#{pos} &a{name} &7- &fandar {floor}"
   record_header: "&6&lRECORDES &7- &f{display} &7(&f{dungeon}&7)"
   record_player_none: "&7• &ePlayer: &7sem recorde"
   record_player_line: "&7• &ePlayer: &f{name} &7- &f{time}"
@@ -117,7 +119,7 @@ usage:
   invite: "&cUse: &f/tower invite <player>"
   give_key: "&cUse: &f/tower give key <player> <dungeonId> [amount]"
   giveall_key: "&cUse: &f/tower giveall key <dungeonId> [amount]"
-  top: "&cUse: &f/tower top <wins|time> <dungeonId> [limit]"
+  top: "&cUse: &f/tower top <wins|time|floor> <dungeonId> [limit]"
   record: "&cUse: &f/tower record <dungeonId>"
   menu: "&cUse: &f/tower menu <solo|party> [player]"
   menu_console: "&cConsole: use &f/tower menu <solo|party> <player>"
@@ -131,7 +133,7 @@ help:
   invite: "&f/tower invite <player> &7- convidar para party"
   accept: "&f/tower accept &7- aceitar convite de party"
   leave: "&f/tower leave &7- sair da dungeon"
-  top: "&f/tower top <wins|time> <dungeonId> [limit] &7- ranking da torre"
+  top: "&f/tower top <wins|time|floor> <dungeonId> [limit] &7- ranking da torre"
   record: "&f/tower record <dungeonId> &7- recordes (player e party)"
 
   admin_separator: "&8--- &cAdmin&8 ---"
@@ -143,7 +145,7 @@ help:
   admin_give: "&f/tower give key <player> <dungeonId> [amount]"
   admin_giveall: "&f/tower giveall key <dungeonId> [amount]"
 
-  console: "&bInfinityTower &7- console: &f/tower admin <reload|list|create|menu> &7| &f/tower menu <solo|party> <player> &7| &f/tower top <wins|time> <dungeonId> [limit] &7| &f/tower record <dungeonId> &7| &f/tower give key <player> <dungeonId> [amount] &7| &f/tower giveall key <dungeonId> [amount]"
+  console: "&bInfinityTower &7- console: &f/tower admin <reload|list|create|menu> &7| &f/tower menu <solo|party> <player> &7| &f/tower top <wins|time|floor> <dungeonId> [limit] &7| &f/tower record <dungeonId> &7| &f/tower give key <player> <dungeonId> [amount] &7| &f/tower giveall key <dungeonId> [amount]"
   admin_console: "&cAdmin(console): &f/tower admin reload | list | create <id> | menu <solo|party> <player> | give key <player> <dungeon> [amount] | giveall key <dungeon> [amount]"
 
 database:

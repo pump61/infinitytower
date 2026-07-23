@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class RankingManager {
 
-    public enum BoardType { WINS, TIME }
+    public enum BoardType { WINS, TIME, FLOOR }
 
     public record Entry(UUID uuid, long value) {}
 
@@ -47,6 +47,10 @@ public final class RankingManager {
         return getBoard(BoardType.TIME, dungeonId, limit);
     }
 
+    public List<Entry> getTopBestFloor(String dungeonId, int limit) {
+        return getBoard(BoardType.FLOOR, dungeonId, limit);
+    }
+
     private List<Entry> getBoard(BoardType type, String dungeonId, int limit) {
         if (dungeonId == null) dungeonId = "";
         dungeonId = dungeonId.toLowerCase(Locale.ROOT);
@@ -65,6 +69,7 @@ public final class RankingManager {
         List<Entry> list = switch (type) {
             case WINS -> repo.selectTopWins(dungeonId, limit);
             case TIME -> repo.selectTopBestTimes(dungeonId, limit);
+            case FLOOR -> repo.selectTopBestFloor(dungeonId, limit);
         };
 
         cacheBoards.put(key, new CacheEntry<>(list));

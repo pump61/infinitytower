@@ -193,46 +193,6 @@ public final class RunHistoryRepository {
     }
 
     // =========================
-    // READS (se você quiser usar no menu depois)
-    // =========================
-
-    public PlayerStats selectPlayerStats(UUID playerUuid) {
-        if (db == null || !db.isConnected()) return new PlayerStats(0, 0, 0, 0);
-
-        String uuid = (playerUuid == null ? "" : playerUuid.toString());
-
-        String sql =
-                "SELECT " +
-                        "SUM(CASE WHEN mode = 'SOLO' THEN 1 ELSE 0 END) AS solo_runs, " +
-                        "SUM(CASE WHEN mode = 'PARTY' THEN 1 ELSE 0 END) AS party_runs, " +
-                        "SUM(CASE WHEN finished = 1 THEN 1 ELSE 0 END) AS wins, " +
-                        "SUM(CASE WHEN ended_at > 0 AND finished = 0 THEN 1 ELSE 0 END) AS losses " +
-                        "FROM itower_run_history " +
-                        "WHERE (members LIKE ? OR leader_uuid = ?)";
-
-        try (PreparedStatement ps = db.getConnection().prepareStatement(sql)) {
-            ps.setString(1, "%" + uuid + "%");
-            ps.setString(2, uuid);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    long solo = rs.getLong("solo_runs");
-                    long party = rs.getLong("party_runs");
-                    long wins = rs.getLong("wins");
-                    long losses = rs.getLong("losses");
-                    return new PlayerStats(solo, party, wins, losses);
-                }
-            }
-        } catch (SQLException e) {
-            plugin.getLogger().warning("DB selectPlayerStats falhou: " + e.getMessage());
-        }
-
-        return new PlayerStats(0, 0, 0, 0);
-    }
-
-    public record PlayerStats(long soloRuns, long partyRuns, long wins, long losses) {}
-
-    // =========================
     // HELPERS
     // =========================
 

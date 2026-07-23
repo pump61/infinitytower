@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -18,19 +17,6 @@ public final class PlayerConnectionListener implements Listener {
 
     public PlayerConnectionListener(InfinityTower plugin) {
         this.plugin = plugin;
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onJoin(PlayerJoinEvent event) {
-        final Player p = event.getPlayer();
-        final UUID id = p.getUniqueId();
-
-        // ✅ 1 tick depois (evita problemas de timing)
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            try {
-                plugin.getPlayerDataManager().loadPlayer(id);
-            } catch (Throwable ignored) {}
-        }, 1L);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -71,11 +57,6 @@ public final class PlayerConnectionListener implements Listener {
                     }
                 }
             }
-        } catch (Throwable ignored) {}
-
-        // 3) PlayerData unload
-        try {
-            plugin.getPlayerDataManager().unloadPlayer(id);
         } catch (Throwable ignored) {}
     }
 }

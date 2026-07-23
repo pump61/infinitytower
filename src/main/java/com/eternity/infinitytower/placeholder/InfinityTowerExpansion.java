@@ -85,32 +85,48 @@ public final class InfinityTowerExpansion extends PlaceholderExpansion {
         }
 
         // =========================
-        // TOP WINS placeholders (AJLeaderboards / hologramas)
+        // TOP WINS / TOP FLOOR placeholders (AJLeaderboards / hologramas)
         // Formatos:
         // %infinitytower_top_wins_<pos>_<dungeon>_name%
         // %infinitytower_top_wins_<pos>_<dungeon>_value%
-        // Ex: %infinitytower_top_wins_1_torre1_name%
+        // %infinitytower_top_floor_<pos>_<dungeon>_name%
+        // %infinitytower_top_floor_<pos>_<dungeon>_value%
+        // Ex: %infinitytower_top_wins_1_solo_10_name%
+        //
+        // ⚠ dungeonId pode ter underscore (ex: solo_10), então o parsing
+        // isola só o <pos> (primeiro underscore) e o <field> (último underscore)
+        // e deixa tudo que sobrar no meio como dungeonId.
         // =========================
-        if (params.startsWith("top_wins_")) {
-            // top_wins_<pos>_<dungeon>_(name|value)
-            String[] parts = params.split("_", 5);
-            // [0]=top [1]=wins [2]=pos [3]=dungeon [4]=name/value
-            if (parts.length < 5) return "";
+        if (params.startsWith("top_wins_") || params.startsWith("top_floor_")) {
+            boolean isFloor = params.startsWith("top_floor_");
+            String rest = params.substring(isFloor ? "top_floor_".length() : "top_wins_".length());
+
+            int firstUnderscore = rest.indexOf('_');
+            if (firstUnderscore < 0) return "";
+            String posStr = rest.substring(0, firstUnderscore);
+
+            String afterPos = rest.substring(firstUnderscore + 1);
+            int lastUnderscore = afterPos.lastIndexOf('_');
+            if (lastUnderscore < 0) return "";
+
+            String dungeonId = afterPos.substring(0, lastUnderscore);
+            String field = afterPos.substring(lastUnderscore + 1);
+            if (dungeonId.isBlank()) return "";
 
             int pos;
             try {
-                pos = Integer.parseInt(parts[2]);
+                pos = Integer.parseInt(posStr);
             } catch (Exception e) {
                 return "";
             }
 
-            String dungeonId = parts[3];
-            String field = parts[4];
-
             TowerStatsRepository repo = plugin.getTowerStatsRepository();
             if (repo == null) return "";
 
-            List<com.eternity.infinitytower.manager.RankingManager.Entry> top = repo.selectTopWins(dungeonId, Math.max(1, pos));
+            List<com.eternity.infinitytower.manager.RankingManager.Entry> top = isFloor
+                    ? repo.selectTopBestFloor(dungeonId, Math.max(1, pos))
+                    : repo.selectTopWins(dungeonId, Math.max(1, pos));
+
             if (top.size() < pos) {
                 return field.equals("value") ? "0" : "-";
             }
@@ -131,12 +147,27 @@ public final class InfinityTowerExpansion extends PlaceholderExpansion {
         // %infinitytower_best_player_<dungeon>_name%
         // %infinitytower_best_player_<dungeon>_time_ms%
         // %infinitytower_best_party_<dungeon>_time_ms%
+        // %infinitytower_best_party_<dungeon>_leader%
+        //
+        // ⚠ dungeonId pode ter underscore, e o campo "time_ms" também tem
+        // underscore — por isso o field é resolvido tentando os sufixos
+        // conhecidos, nunca por split() por posição fixa.
         // =========================
         if (params.startsWith("best_player_")) {
-            String[] parts = params.split("_", 4);
-            if (parts.length < 4) return "";
-            String dungeonId = parts[2];
-            String field = parts[3];
+            String rest = params.substring("best_player_".length());
+
+            String dungeonId;
+            String field;
+            if (rest.endsWith("_time_ms")) {
+                field = "time_ms";
+                dungeonId = rest.substring(0, rest.length() - "_time_ms".length());
+            } else if (rest.endsWith("_name")) {
+                field = "name";
+                dungeonId = rest.substring(0, rest.length() - "_name".length());
+            } else {
+                return "";
+            }
+            if (dungeonId.isBlank()) return "";
 
             TowerStatsRepository repo = plugin.getTowerStatsRepository();
             if (repo == null) return "";
@@ -155,10 +186,20 @@ public final class InfinityTowerExpansion extends PlaceholderExpansion {
         }
 
         if (params.startsWith("best_party_")) {
-            String[] parts = params.split("_", 4);
-            if (parts.length < 4) return "";
-            String dungeonId = parts[2];
-            String field = parts[3];
+            String rest = params.substring("best_party_".length());
+
+            String dungeonId;
+            String field;
+            if (rest.endsWith("_time_ms")) {
+                field = "time_ms";
+                dungeonId = rest.substring(0, rest.length() - "_time_ms".length());
+            } else if (rest.endsWith("_leader")) {
+                field = "leader";
+                dungeonId = rest.substring(0, rest.length() - "_leader".length());
+            } else {
+                return "";
+            }
+            if (dungeonId.isBlank()) return "";
 
             TowerStatsRepository repo = plugin.getTowerStatsRepository();
             if (repo == null) return "";

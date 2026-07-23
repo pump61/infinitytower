@@ -111,18 +111,6 @@ public final class DatabaseManager {
 
             if (mysql) {
                 // =========================================
-                // PLAYER DATA (cache simples)
-                // =========================================
-                st.executeUpdate(
-                        "CREATE TABLE IF NOT EXISTS itower_player (" +
-                                "uuid VARCHAR(36) PRIMARY KEY, " +
-                                "best_floor INT NOT NULL DEFAULT 0, " +
-                                "extra_value INT NOT NULL DEFAULT 0, " +
-                                "updated_at BIGINT NOT NULL DEFAULT 0" +
-                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
-                );
-
-                // =========================================
                 // STATS GLOBAIS (menu /tower stats)
                 // =========================================
                 st.executeUpdate(
@@ -212,15 +200,6 @@ public final class DatabaseManager {
             } else {
                 // SQLITE
                 st.executeUpdate(
-                        "CREATE TABLE IF NOT EXISTS itower_player (" +
-                                "uuid TEXT PRIMARY KEY, " +
-                                "best_floor INTEGER NOT NULL DEFAULT 0, " +
-                                "extra_value INTEGER NOT NULL DEFAULT 0, " +
-                                "updated_at INTEGER NOT NULL DEFAULT 0" +
-                                ");"
-                );
-
-                st.executeUpdate(
                         "CREATE TABLE IF NOT EXISTS itower_player_stats (" +
                                 "uuid TEXT PRIMARY KEY, " +
                                 "solo_runs INTEGER NOT NULL DEFAULT 0, " +
@@ -296,13 +275,6 @@ public final class DatabaseManager {
         if (!isConnected()) return;
 
         try (Statement st = connection.createStatement()) {
-
-            ensureColumnExists(st, "itower_player", "best_floor",
-                    mysql ? "INT NOT NULL DEFAULT 0" : "INTEGER NOT NULL DEFAULT 0");
-            ensureColumnExists(st, "itower_player", "extra_value",
-                    mysql ? "INT NOT NULL DEFAULT 0" : "INTEGER NOT NULL DEFAULT 0");
-            ensureColumnExists(st, "itower_player", "updated_at",
-                    mysql ? "BIGINT NOT NULL DEFAULT 0" : "INTEGER NOT NULL DEFAULT 0");
 
             ensureColumnExists(st, "itower_run_history", "leader_name",
                     mysql ? "VARCHAR(32) NOT NULL DEFAULT ''" : "TEXT NOT NULL DEFAULT ''");

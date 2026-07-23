@@ -14,7 +14,7 @@ Plugin para **Paper/Spigot 1.21** que implementa um sistema de "torre infinita" 
 | [PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI) | **depend** (obrigatório) | Expõe os placeholders `%infinitytower_...%` |
 | [MythicMobs](https://www.mythicmobs.net/) | soft-depend | Spawn de mobs customizados nos andares (`mythic:` no YAML da dungeon) |
 | [Citizens](https://www.citizensnpcs.co/) | soft-depend | Declarado no `plugin.yml`; sem integração de código no momento |
-| [EssentialsX](https://essentialsx.net/) | soft-depend | `/back` ao sair da dungeon (`EssentialsBackUtil`) |
+| [EssentialsX](https://essentialsx.net/) | soft-depend | Sobrescreve o `/back` do Essentials ao sair da dungeon (`EssentialsBackUtil`). O plugin também bloqueia `/back` por alguns segundos por conta própria (`tower.back_block_seconds`), então essa proteção funciona mesmo sem o Essentials instalado |
 | SQLite JDBC / MySQL Connector/J | embutido (shaded) | Persistência de stats, ranking e histórico de runs |
 
 ## Instalação
@@ -47,7 +47,7 @@ Comando raiz: **`/tower`** (alias: `/torre`).
 | `/tower party kick <player>` | Expulsa um membro (somente líder) |
 | `/tower invite <player>` / `/tower accept` | Aliases legados de `party invite`/`party accept` |
 | `/tower leave` | Sai da dungeon/run atual |
-| `/tower top <wins\|time> <dungeonId> [limit]` | Ranking de vitórias ou melhor tempo (limite 1–50, padrão 10) |
+| `/tower top <wins\|time\|floor> <dungeonId> [limit]` | Ranking de vitórias, melhor tempo ou andar mais alto alcançado (limite 1–50, padrão 10) |
 | `/tower record <dungeonId>` | Recorde individual e de party daquela dungeon |
 
 ### Admin (`infinitytower.admin`, default: op)
@@ -100,6 +100,8 @@ Identificador da expansion: `infinitytower` → use como `%infinitytower_<param>
 |---|---|
 | `%infinitytower_top_wins_<pos>_<dungeonId>_name%` | Nome do jogador na posição `<pos>` do ranking de vitórias daquela dungeon |
 | `%infinitytower_top_wins_<pos>_<dungeonId>_value%` | Quantidade de vitórias dessa posição |
+| `%infinitytower_top_floor_<pos>_<dungeonId>_name%` | Nome do jogador na posição `<pos>` do ranking de andar mais alto alcançado |
+| `%infinitytower_top_floor_<pos>_<dungeonId>_value%` | Andar mais alto alcançado por essa posição |
 | `%infinitytower_best_player_<dungeonId>_name%` | Nome do melhor tempo individual da dungeon |
 | `%infinitytower_best_player_<dungeonId>_time_ms%` | Melhor tempo individual em milissegundos |
 | `%infinitytower_best_party_<dungeonId>_leader%` | Líder da melhor run em party |
@@ -107,6 +109,7 @@ Identificador da expansion: `infinitytower` → use como `%infinitytower_<param>
 
 > Exemplo: `%infinitytower_top_wins_1_solo_10_name%` — nome do #1 do ranking de vitórias da dungeon `solo_10`.
 > Posições sem registro retornam `-` (texto) ou `0` (valor numérico).
+> `<dungeonId>` pode conter underscore (`solo_10`, `party_10`, etc.) sem problema — o parsing isola só a posição (`<pos>`) e o campo final (`name`/`value`/`time_ms`/`leader`), o resto vira o id da dungeon.
 
 ## Estrutura de arquivos (`plugins/InfinityTower/`)
 
@@ -134,6 +137,7 @@ Principais chaves:
 - `dungeon.command_whitelist` — lista de comandos permitidos dentro da dungeon (o resto é bloqueado por `CommandWhitelistListener`).
 - `main-menu` / `stats-menu` — variante alternativa de menu (o layout "oficial" usado em runtime é `menus.yml`; estas seções ficam como referência/legado).
 - `tower.enter_teleport_delay_seconds` — delay global (segundos), aplicado a **todas** as dungeons, entre abrir o menu/clicar e teleportar o jogador para a arena (dá tempo de carregar chunks, HUD, etc.). Padrão: `2` se a chave não existir.
+- `tower.back_block_seconds` — segundos em que `/back` (e variações: `/eback`, `/cback`, `essentials:back`, `cmi:back`) ficam bloqueados após o jogador sair/terminar a dungeon. Funciona independente de ter EssentialsX instalado. Padrão: `5`.
 - `spawn` — spawn global de fallback quando uma dungeon não tem `return_spawn`/`player_spawns` configurado (ou o mundo configurado não existe).
 - `database.*` — ver seção [Banco de dados](#banco-de-dados).
 - `debug.enabled` — liga logs extras de depuração.
@@ -166,7 +170,7 @@ Cada arquivo YAML dentro de `plugins/InfinityTower/dungeons/` descreve um **mapa
 | `allow_empty_floors` | `true`/`false` | `false` | Se `false`, um andar sem nenhum mob configurado (ou cujos mobs falharem ao spawnar) **cancela a run** com a mensagem `floor_no_mobs`/`floor_spawn_failed`. Se `true`, o andar é tratado como "vazio" e a run segue |
 | `start_delay_seconds` | segundos | `10` | Tempo entre o title `on_enter` (ao clicar pra entrar) e o início efetivo do andar 1 — durante esse tempo o title `preparing` também é mostrado |
 | `next_floor_delay_seconds` | segundos | `5` | Tempo de espera entre um andar ser limpo e o próximo começar |
-| `allow_solo_in_party` | `true`/`false` | — | **Presente nos templates, mas não lido em nenhum lugar do código atual** (chave reservada/sem efeito hoje). Quem realmente decide se é permitido jogar sozinho é o `mode` da dungeon — veja a tabela da próxima seção |
+| `allow_solo_in_party` | `true`/`false` | `true` | Só vale para dungeons `mode: SOLO`. Se `true` (padrão), um jogador em party ainda pode entrar sozinho numa dungeon SOLO (a run é só dele, o resto da party não é afetado). Se `false`, jogadores em party são bloqueados no menu SOLO (`solo_requires_no_party`) até saírem da party — veja a tabela da próxima seção |
 | `access.*` | seção | — | Chave de acesso e limitador de entradas — ver [Acesso e entrada](#acesso-e-entrada-chaves-e-limitador) |
 | `menu-item.*` | seção | — | Ícone da dungeon nos menus solo/party — ver [Aparência no menu](#aparência-no-menu-menu-item) |
 | `player_spawns` | lista de locais | — | Pontos de spawn ao entrar **sozinho** (SOLO, ou PARTY sem estar em party) — um é sorteado aleatoriamente a cada entrada |
@@ -202,10 +206,10 @@ Sequência real de eventos (código: [`DungeonSession`](src/main/java/com/eterni
 
 O `mode` da dungeon decide o comportamento no menu (código: [`MenuListener`](src/main/java/com/eternity/infinitytower/listener/MenuListener.java)):
 
-| `mode` | Jogador sem party | Jogador em party (líder) | Jogador em party (membro) |
-|---|---|---|---|
-| `SOLO` | Entra normalmente sozinho | **Bloqueado** — mensagem `solo_requires_no_party` (precisa sair da party) | Bloqueado (mesma regra) |
-| `PARTY` | Entra sozinho (run "solo" numa dungeon party) | Inicia a run **para toda a party** | Bloqueado no menu — só o líder inicia (`party_only_leader_start_menu`) |
+| `mode` | Jogador sem party | Jogador em party (líder ou membro) |
+|---|---|---|
+| `SOLO` | Entra normalmente sozinho | Depende de `allow_solo_in_party` da dungeon: `true` (padrão) → entra sozinho normalmente, sem afetar o resto da party; `false` → **bloqueado**, mensagem `solo_requires_no_party` (precisa sair da party) |
+| `PARTY` | Entra sozinho (run "solo" numa dungeon party) | **Líder**: inicia a run para toda a party. **Membro**: bloqueado no menu — só o líder inicia (`party_only_leader_start_menu`) |
 
 O menu solo só lista dungeons `mode: SOLO`; o menu party só lista `mode: PARTY` — dá pra ter as duas versões da "mesma" dungeon (uma de cada `mode`) usando o recurso de [dungeons extra](#arenas-alternativas-e-dungeons-extra) no mesmo arquivo, se quiser.
 

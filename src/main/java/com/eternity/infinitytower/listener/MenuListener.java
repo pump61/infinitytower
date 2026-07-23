@@ -74,8 +74,8 @@ public final class MenuListener implements Listener {
         // =========================
         if (holder.getType() == MenuManager.MenuType.SOLO) {
 
-            // party não entra em SOLO
-            if (hasParty) {
+            // party só é bloqueada de dungeons SOLO se allow_solo_in_party=false (padrão: true, permite)
+            if (hasParty && !dungeon.getBoolean("allow_solo_in_party", true)) {
                 player.sendMessage(lang("messages.solo_requires_no_party",
                         "&cVocê está em uma party. Saia da party para entrar em torres SOLO."));
                 player.closeInventory();

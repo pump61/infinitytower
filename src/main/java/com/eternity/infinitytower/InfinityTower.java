@@ -21,7 +21,6 @@ import com.eternity.infinitytower.log.RunLogger;
 import com.eternity.infinitytower.manager.PartyManager;
 import com.eternity.infinitytower.manager.RankingManager;
 import com.eternity.infinitytower.menu.MenuManager;
-import com.eternity.infinitytower.player.PlayerDataManager;
 import com.eternity.infinitytower.tower.InfinityTowerManager;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -39,7 +38,6 @@ public final class InfinityTower extends JavaPlugin {
     private PartyManager partyManager;
     private RankingManager rankingManager;
     private DatabaseManager databaseManager;
-    private PlayerDataManager playerDataManager;
     private PlayerStatsRepository playerStatsRepository;
 
     private InfinityTowerManager infinityTowerManager;
@@ -57,6 +55,8 @@ public final class InfinityTower extends JavaPlugin {
     private RunHistoryRepository runHistoryRepository;
 
     private RunLogger runLogger;
+
+    private CommandWhitelistListener commandWhitelistListener;
 
     @Override
     public void onEnable() {
@@ -89,8 +89,9 @@ public final class InfinityTower extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PartyFriendlyFireListener(this), this);
 
-        // ✅ BLOQUEIO DE COMANDOS NA DUNGEON
-        getServer().getPluginManager().registerEvents(new CommandWhitelistListener(this), this);
+        // ✅ BLOQUEIO DE COMANDOS NA DUNGEON (guarda referência p/ blockBackFor)
+        this.commandWhitelistListener = new CommandWhitelistListener(this);
+        getServer().getPluginManager().registerEvents(commandWhitelistListener, this);
 
         // COMMAND
         PluginCommand towerCmd = Objects.requireNonNull(
@@ -112,9 +113,6 @@ public final class InfinityTower extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
-        if (playerDataManager != null)
-            playerDataManager.saveAll();
 
         if (infinityTowerManager != null)
             infinityTowerManager.shutdown();
@@ -205,8 +203,6 @@ public final class InfinityTower extends JavaPlugin {
         partyManager = new PartyManager(this);
         rankingManager = new RankingManager(this);
 
-        playerDataManager = new PlayerDataManager(this, databaseManager);
-
         infinityTowerManager = new InfinityTowerManager(this);
 
         menuManager = new MenuManager(this);
@@ -274,10 +270,6 @@ public final class InfinityTower extends JavaPlugin {
         return infinityTowerManager;
     }
 
-    public PlayerDataManager getPlayerDataManager() {
-        return playerDataManager;
-    }
-
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
     }
@@ -312,6 +304,10 @@ public final class InfinityTower extends JavaPlugin {
 
     public RunLogger getRunLogger() {
         return runLogger;
+    }
+
+    public CommandWhitelistListener getCommandWhitelistListener() {
+        return commandWhitelistListener;
     }
 
     public PlayerStatsRepository getPlayerStatsRepository() {
