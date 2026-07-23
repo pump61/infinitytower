@@ -1,59 +1,21 @@
 # ============================================================
 # InfinityTower - menus.yml
-# Contém: main_menu, player_stats_menu, menus (solo/party)
+# Contém: player_stats_menu, menus (solo/party)
+#
+# OBS: o menu principal (/tower menu) NÃO é configurado aqui — ele usa
+# a seção "main-menu" (ou "main_menu") do config.yml.
 # ============================================================
 
 # ------------------------------------------------------------
-# MAIN MENU (menu principal)
-# ------------------------------------------------------------
-main_menu:
-  enabled: true
-  size: 27
-  title: "&8Infinity Tower"
-
-  filler:
-    enabled: true
-    material: "BLACK_STAINED_GLASS_PANE"
-    name: " "
-    lore: []
-    custom_model_data: 0
-
-  buttons:
-    solo:
-      enabled: true
-      slot: 12
-      material: "DIAMOND_SWORD"
-      name: "&a&lDUNGEON SOLO"
-      lore:
-        - ""
-        - "&7Clique para abrir o menu SOLO."
-      custom_model_data: 0
-
-    spacer:
-      enabled: true
-      slot: 13
-      material: "AIR"
-      name: " "
-      lore: []
-      custom_model_data: 0
-
-    party:
-      enabled: true
-      slot: 14
-      material: "GOLDEN_SWORD"
-      name: "&e&lDUNGEON PARTY"
-      lore:
-        - ""
-        - "&7Clique para abrir o menu PARTY."
-      custom_model_data: 0
-
-
-# ------------------------------------------------------------
-# PLAYER STATS MENU (estatísticas do jogador)
-# Placeholders:
-# {player}
+# PLAYER STATS MENU (estatísticas do jogador, /tower stats)
+# Placeholders disponíveis em title/name/lore de qualquer item:
+# {player} {uuid}
 # {soloRuns} {soloWins} {soloLosses}
 # {partyRuns} {partyWins} {partyLosses}
+# {totalRuns} {totalWins} {totalLosses}
+#
+# "items" aceita qualquer quantidade de entradas (não só solo/party/total) —
+# cada uma vira um item no slot configurado.
 # ------------------------------------------------------------
 player_stats_menu:
   enabled: true
@@ -78,6 +40,18 @@ player_stats_menu:
         - "&7Entradas: &f{soloRuns}"
         - "&7Vitórias: &a{soloWins}"
         - "&7Derrotas: &c{soloLosses}"
+      custom_model_data: 0
+
+    total:
+      enabled: true
+      slot: 13
+      material: "BOOK"
+      name: "&6&lGERAL"
+      lore:
+        - ""
+        - "&7Entradas: &f{totalRuns}"
+        - "&7Vitórias: &a{totalWins}"
+        - "&7Derrotas: &c{totalLosses}"
       custom_model_data: 0
 
     party:

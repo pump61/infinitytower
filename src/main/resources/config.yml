@@ -75,49 +75,8 @@ main-menu:
         - "&7Clique para jogar com sua party."
       custom_model_data: 0
 
-stats-menu:
-  title: "&#00FF7F&lSUAS ESTATÍSTICAS"
-  size: 27
-
-  filler:
-    enabled: true
-    material: BLACK_STAINED_GLASS_PANE
-    name: " "
-    lore: []
-    custom_model_data: 0
-
-  player:
-    slot: 4
-    name: "&#FFD700&l{player}"
-    lore:
-      - ""
-      - "&7UUID: &f{uuid}"
-      - "&7Runs Totais: &f{total_runs}"
-      - "&7Vitórias Totais: &a{total_wins}"
-      - "&7Derrotas Totais: &c{total_losses}"
-
-  solo:
-    slot: 12
-    material: DIAMOND_SWORD
-    name: "&#00FF7F&lTORRE SOLO"
-    lore:
-      - ""
-      - "&7Runs: &f{solo_runs}"
-      - "&7Vitórias: &a{solo_wins}"
-      - "&7Derrotas: &c{solo_losses}"
-    custom_model_data: 0
-
-  party:
-    slot: 14
-    material: GOLDEN_SWORD
-    name: "&#FFD700&lTORRE PARTY"
-    lore:
-      - ""
-      - "&7Runs: &f{party_runs}"
-      - "&7Vitórias: &a{party_wins}"
-      - "&7Derrotas: &c{party_losses}"
-    custom_model_data: 0
-
+# OBS: o menu de estatísticas (/tower stats) é configurado em menus.yml
+# (seção "player_stats_menu"), não aqui.
 
 # =====================================================
 # Spawn global fallback (caso dungeon não tenha return_spawn)

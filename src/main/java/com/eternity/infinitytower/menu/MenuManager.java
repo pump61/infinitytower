@@ -369,18 +369,11 @@ public final class MenuManager {
 
     /*
      * =========================================
-     * STATS MENU (o seu continua como está)
+     * STATS MENU (agora configurável via menus.yml: player_stats_menu)
      * =========================================
      */
 
     public void openStatsMenu(Player player) {
-
-        int size = 27;
-        String title = plugin.getLang().getString("menus.stats.title", "&b&lSuas Estatísticas");
-        Inventory inv = Bukkit.createInventory(new StatsMenuHolder(), size, TextUtil.color(title));
-
-        ItemStack filler = simpleItem(Material.BLACK_STAINED_GLASS_PANE, " ", List.of());
-        for (int i = 0; i < size; i++) inv.setItem(i, filler);
 
         PlayerStatsRepository repo = plugin.getPlayerStatsRepository();
         PlayerStatsRepository.PlayerStats st =
@@ -398,39 +391,92 @@ public final class MenuManager {
         int totalWins = soloWins + partyWins;
         int totalLoss = soloLoss + partyLoss;
 
-        inv.setItem(11, simpleItem(Material.DIAMOND_SWORD,
-                TextUtil.color(plugin.getLang().getString("menus.stats.solo_name", "&#00FF7F&lSOLO")),
+        Map<String, String> ph = new HashMap<>();
+        ph.put("{player}", player.getName());
+        ph.put("{uuid}", player.getUniqueId().toString());
+        ph.put("{soloRuns}", String.valueOf(soloRuns));
+        ph.put("{soloWins}", String.valueOf(soloWins));
+        ph.put("{soloLosses}", String.valueOf(soloLoss));
+        ph.put("{partyRuns}", String.valueOf(partyRuns));
+        ph.put("{partyWins}", String.valueOf(partyWins));
+        ph.put("{partyLosses}", String.valueOf(partyLoss));
+        ph.put("{totalRuns}", String.valueOf(totalRuns));
+        ph.put("{totalWins}", String.valueOf(totalWins));
+        ph.put("{totalLosses}", String.valueOf(totalLoss));
+
+        ConfigurationSection sec = menus.getConfigurationSection("player_stats_menu");
+        if (sec == null) {
+            openStatsMenuFallback(player, soloRuns, soloWins, soloLoss, totalRuns, totalWins, totalLoss, partyRuns, partyWins, partyLoss);
+            return;
+        }
+
+        String title = TextUtil.color(applyPlaceholders(sec.getString("title", "&8Suas Estatísticas"), ph));
+        int size = clampToInventorySize(sec.getInt("size", 27));
+
+        Inventory inv = Bukkit.createInventory(new StatsMenuHolder(), size, title);
+
+        ConfigurationSection fillerSec = sec.getConfigurationSection("filler");
+        if (fillerSec != null && fillerSec.getBoolean("enabled", false)) {
+            ItemStack filler = buildItem(fillerSec, ph);
+            if (filler != null && filler.getType() != Material.AIR) {
+                for (int i = 0; i < size; i++) inv.setItem(i, filler);
+            }
+        }
+
+        ConfigurationSection items = sec.getConfigurationSection("items");
+        if (items != null) {
+            for (String key : items.getKeys(false)) {
+                ConfigurationSection itSec = items.getConfigurationSection(key);
+                if (itSec == null) continue;
+                if (!itSec.getBoolean("enabled", true)) continue;
+
+                int slot = itSec.getInt("slot", -1);
+                if (slot < 0 || slot >= size) continue;
+
+                ItemStack it = buildItem(itSec, ph);
+                if (it != null && it.getType() != Material.AIR) inv.setItem(slot, it);
+            }
+        }
+
+        player.openInventory(inv);
+    }
+
+    /**
+     * Fallback só usado se menus.yml não tiver a seção player_stats_menu
+     * (ex.: arquivo de uma versão bem antiga do plugin). Reproduz o
+     * layout fixo original (solo/geral/party nos slots 11/13/15).
+     */
+    private void openStatsMenuFallback(Player player, int soloRuns, int soloWins, int soloLoss,
+                                        int totalRuns, int totalWins, int totalLoss,
+                                        int partyRuns, int partyWins, int partyLoss) {
+
+        int size = 27;
+        Inventory inv = Bukkit.createInventory(new StatsMenuHolder(), size, TextUtil.color("&8Suas Estatísticas"));
+
+        ItemStack filler = simpleItem(Material.BLACK_STAINED_GLASS_PANE, " ", List.of());
+        for (int i = 0; i < size; i++) inv.setItem(i, filler);
+
+        inv.setItem(11, simpleItem(Material.DIAMOND_SWORD, TextUtil.color("&a&lSOLO"),
                 List.of(
-                        TextUtil.color(plugin.getLang().getString("menus.stats.runs", "&7Runs: &f{v}")
-                                .replace("{v}", String.valueOf(soloRuns))),
-                        TextUtil.color(plugin.getLang().getString("menus.stats.wins", "&7Vitórias: &a{v}")
-                                .replace("{v}", String.valueOf(soloWins))),
-                        TextUtil.color(plugin.getLang().getString("menus.stats.losses", "&7Derrotas: &c{v}")
-                                .replace("{v}", String.valueOf(soloLoss)))
+                        TextUtil.color("&7Entradas: &f" + soloRuns),
+                        TextUtil.color("&7Vitórias: &a" + soloWins),
+                        TextUtil.color("&7Derrotas: &c" + soloLoss)
                 )
         ));
 
-        inv.setItem(13, simpleItem(Material.BOOK,
-                TextUtil.color(plugin.getLang().getString("menus.stats.total_name", "&#FFD700&lGERAL")),
+        inv.setItem(13, simpleItem(Material.BOOK, TextUtil.color("&6&lGERAL"),
                 List.of(
-                        TextUtil.color(plugin.getLang().getString("menus.stats.runs", "&7Runs: &f{v}")
-                                .replace("{v}", String.valueOf(totalRuns))),
-                        TextUtil.color(plugin.getLang().getString("menus.stats.wins", "&7Vitórias: &a{v}")
-                                .replace("{v}", String.valueOf(totalWins))),
-                        TextUtil.color(plugin.getLang().getString("menus.stats.losses", "&7Derrotas: &c{v}")
-                                .replace("{v}", String.valueOf(totalLoss)))
+                        TextUtil.color("&7Entradas: &f" + totalRuns),
+                        TextUtil.color("&7Vitórias: &a" + totalWins),
+                        TextUtil.color("&7Derrotas: &c" + totalLoss)
                 )
         ));
 
-        inv.setItem(15, simpleItem(Material.GOLDEN_SWORD,
-                TextUtil.color(plugin.getLang().getString("menus.stats.party_name", "&#FFD700&lPARTY")),
+        inv.setItem(15, simpleItem(Material.GOLDEN_SWORD, TextUtil.color("&6&lPARTY"),
                 List.of(
-                        TextUtil.color(plugin.getLang().getString("menus.stats.runs", "&7Runs: &f{v}")
-                                .replace("{v}", String.valueOf(partyRuns))),
-                        TextUtil.color(plugin.getLang().getString("menus.stats.wins", "&7Vitórias: &a{v}")
-                                .replace("{v}", String.valueOf(partyWins))),
-                        TextUtil.color(plugin.getLang().getString("menus.stats.losses", "&7Derrotas: &c{v}")
-                                .replace("{v}", String.valueOf(partyLoss)))
+                        TextUtil.color("&7Entradas: &f" + partyRuns),
+                        TextUtil.color("&7Vitórias: &a" + partyWins),
+                        TextUtil.color("&7Derrotas: &c" + partyLoss)
                 )
         ));
 

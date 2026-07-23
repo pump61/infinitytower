@@ -135,7 +135,7 @@ Principais chaves:
 - `tower.title_times` — `fade_in_ticks` / `stay_ticks` / `fade_out_ticks` dos titles de andar/entrada/conclusão.
 - `tower.tracking.spawn_radius` — raio (em blocos) para capturar minions gerados por mobs do MythicMobs (ex.: adds de um boss) como parte do andar.
 - `dungeon.command_whitelist` — lista de comandos permitidos dentro da dungeon (o resto é bloqueado por `CommandWhitelistListener`).
-- `main-menu` / `stats-menu` — variante alternativa de menu (o layout "oficial" usado em runtime é `menus.yml`; estas seções ficam como referência/legado).
+- `main-menu` (ou `main_menu`) — controla o **menu principal** (`/tower menu`): botões **Solo**/**Party**, filler, título. Essa é a única fonte real desse menu (ver correção na seção [`menus.yml`](#menusyml) logo abaixo).
 - `tower.enter_teleport_delay_seconds` — delay global (segundos), aplicado a **todas** as dungeons, entre abrir o menu/clicar e teleportar o jogador para a arena (dá tempo de carregar chunks, HUD, etc.). Padrão: `2` se a chave não existir.
 - `tower.back_block_seconds` — segundos em que `/back` (e variações: `/eback`, `/cback`, `essentials:back`, `cmi:back`) ficam bloqueados após o jogador sair/terminar a dungeon. Funciona independente de ter EssentialsX instalado. Padrão: `5`.
 - `spawn` — spawn global de fallback quando uma dungeon não tem `return_spawn`/`player_spawns` configurado (ou o mundo configurado não existe).
@@ -144,13 +144,14 @@ Principais chaves:
 
 ### `menus.yml`
 
-Controla três telas:
+Controla duas telas (o menu principal **não** é uma delas — veja a nota abaixo):
 
-- `main_menu` — botões **Solo** (slot 12) e **Party** (slot 14) que abrem os respectivos submenus.
-- `player_stats_menu` — cards de estatística Solo/Party com placeholders `{player} {soloRuns} {soloWins} {soloLosses} {partyRuns} {partyWins} {partyLosses}`.
+- `player_stats_menu` — tela do `/tower stats`. `items.<qualquer_nome>` vira um item no slot configurado, com placeholders `{player} {uuid} {soloRuns} {soloWins} {soloLosses} {partyRuns} {partyWins} {partyLosses} {totalRuns} {totalWins} {totalLosses}` disponíveis em `title`/`name`/`lore` de qualquer item (não só `solo`/`party`/`total`, dá pra adicionar quantos quiser).
 - `menus.solo` / `menus.party` — telas que listam as dungeons daquele modo nos slots definidos em `dungeon-slots`, usando o template `dungeon-item` com placeholders `{id} {display} {mode} {max_floors}`.
 
 Cada item aceita `material`, `name`, `lore`, `custom_model_data` e (nos menus de dungeon) `hide_attributes`. `filler` preenche os slots vazios do inventário.
+
+> **Nota sobre o menu principal (`/tower menu`):** ele é controlado por `config.yml: main-menu`, **não** por `menus.yml`. Até uma revisão recente, `menus.yml` tinha uma seção `main_menu:` e `config.yml` tinha uma seção `stats-menu:` que pareciam configurar essas telas, mas nenhuma das duas nunca era lida pelo código — eram sobras mortas de uma versão anterior. Ambas foram removidas dos arquivos padrão; o menu de stats agora é de fato lido de `menus.yml: player_stats_menu` (antes disso era todo fixo no Java, ignorando qualquer configuração).
 
 ### `lang/pt-BR.yml`
 
