@@ -66,6 +66,7 @@ Comando raiz: **`/tower`** (alias: `/torre`).
 | `/tower admin addspawn <solo\|members>` | Adiciona um spawn à lista (spawns solo ou membros da party) |
 | `/tower admin clearspawns <solo\|members>` | Limpa a lista de spawns |
 | `/tower admin setreturn` | Define o ponto de retorno ao fim/saída da dungeon |
+| `/tower admin setfloorspawn <floor>` | Define pra onde todo mundo é teleportado **só naquele andar** (ver [Trocando de "arena" por andar](#trocando-de-arena-por-andar)) |
 | `/tower admin mobspawn <add\|set\|clear> <floor>` | Gerencia os pontos de spawn de mob de um andar |
 | `/tower admin save` | Salva e recarrega a dungeon em edição |
 | `/tower admin cancel` | Cancela o setup atual sem salvar |
@@ -182,6 +183,7 @@ Cada arquivo YAML dentro de `plugins/InfinityTower/dungeons/` descreve um **mapa
 | `floors.<n>.mobs` | lista | — | Mobs do andar `n` — ver [Configuração de mobs](#configuração-de-mobs-vanilla-vs-mythicmobs) |
 | `floors.<n>.boss` | `true`/`false` | `false` | Marca o andar `n` como andar de boss — troca os titles usados (ver titles) |
 | `floors.<n>.boss_name` | texto | `""` | Preenche o placeholder `{boss_name}` nos titles desse andar |
+| `floors.<n>.floor_spawn` | local único | — (mantém o spawn de entrada) | Teleporta todo mundo pra um local diferente só nesse andar — ver [Trocando de "arena" por andar](#trocando-de-arena-por-andar) |
 | `floors.<n>.titles.*` | seção | — | Override de title **somente para esse andar** — mesmos grupos de `titles.*` (menos `on_enter`/`preparing`/`completed`, que são só de nível raiz) |
 | `floors.<n>.rewards` | seção | — | Recompensas ao limpar o andar — ver [Recompensas](#recompensas-por-andar) |
 
@@ -197,7 +199,7 @@ Sequência real de eventos (código: [`DungeonSession`](src/main/java/com/eterni
 4. Jogador(es) são teleportados para `player_spawns` (solo) ou `party_leader_spawn`/`party_member_spawns` (party).
 5. Title `titles.preparing` é mostrado (placeholders `{floor}`=1, `{delay}`=`start_delay_seconds`).
 6. Espera `start_delay_seconds`.
-7. Andar 1 começa: mobs do `floors.1.mobs` são spawnados; title `floor_started`/`boss_floor_started` (conforme `floors.1.boss`) é mostrado.
+7. Andar 1 começa: se `floors.1.floor_spawn` estiver definido, todo mundo é teleportado pra lá primeiro (senão fica no spawn de entrada) — ver [Trocando de "arena" por andar](#trocando-de-arena-por-andar); mobs do `floors.1.mobs` são spawnados; title `floor_started`/`boss_floor_started` (conforme `floors.1.boss`) é mostrado.
 8. Quando todos os mobs do andar morrem: `floors.<n>.rewards` é entregue a quem está vivo → a cada 10 andares limpos (10, 20, 30…) é feito um **broadcast pro servidor inteiro** (`messages.dungeon_broadcast_floor10`) → title `floor_cleared`/`next_is_boss` (conforme o **próximo** andar ser boss) é mostrado → espera `next_floor_delay_seconds` → repete a partir do passo 7 para o próximo andar.
 9. Se **todos** os jogadores online morrerem no mesmo andar antes de limpá-lo, a run falha (`dungeon_all_dead`) e encerra.
 10. Ao limpar o último andar (`floor > max_floors`): title `titles.completed` (placeholder `{dungeon}` = `display`) e teleporte para `return_spawn`.
@@ -309,6 +311,37 @@ floors:
 - `items` — lista de `type` (nome de `Material`) + `amount`; é adicionado ao inventário do jogador, e o que não couber **cai no chão** aos pés dele. `type` inválido loga `reward_invalid_item` e pula aquele item.
 - `commands` — executados pelo **console** (`Bukkit.dispatchCommand` com o console sender), um por linha, com `{player}` substituído pelo nome do jogador.
 - Só recebem recompensa os jogadores **online e vivos** no momento em que o andar foi limpo — quem morreu naquele andar (`deadThisFloor`) fica de fora dessa rodada de recompensas (mas volta a receber nos andares seguintes, se reviver como espectador do resto da run normalmente).
+
+#### Trocando de "arena" por andar
+
+Por padrão, o jogador entra na dungeon **uma vez** (spawn de `player_spawns`/`party_leader_spawn`/`party_member_spawns`) e fica naquele mesmo lugar físico em todos os andares — só os mobs mudam de acordo com `floors.<n>.mobs`. Isso é ótimo pra torres onde os andares são só "ondas" no mesmo espaço, mas às vezes você quer dar a impressão de estar **subindo de verdade**, trocando de sala/prédio a cada andar (ou reaproveitando um pequeno número de arenas construídas, alternando entre elas).
+
+Pra isso existe `floors.<n>.floor_spawn` — um local (mesmo formato do `return_spawn`) que, se definido, teleporta **todo mundo** (solo ou party inteira) pra lá no início daquele andar específico, em vez de manter a posição de entrada. Andares sem `floor_spawn` continuam usando o comportamento padrão (ficam onde estavam).
+
+```yaml
+floors:
+  1:
+    floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }      # "arena A"
+    mobs: [...]
+  2:
+    floor_spawn: { world: world, x: 0.5, y: 100.0, z: 100.5 }    # "arena B"
+    mobs: [...]
+  3:
+    floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }      # volta pra "arena A"
+    mobs: [...]
+```
+
+Configurando pelo comando (mais prático que editar o YAML na mão):
+
+```
+/tower admin setup solo_10
+/tower admin setfloorspawn 1   # fica em pé na arena A e roda
+/tower admin setfloorspawn 2   # fica em pé na arena B e roda
+/tower admin setfloorspawn 3   # fica em pé na arena A de novo (ou outro lugar) e roda
+/tower admin save
+```
+
+Cada `floors.<n>.mobs[].spawns` daquele andar deve ficar, claro, dentro da arena física correspondente ao `floor_spawn` do mesmo andar — do contrário os mobs spawnam num lugar e os jogadores ficam em outro. `floor_spawn` também respeita [arenas alternativas](#arenas-alternativas-e-dungeons-extra): configure `/tower admin setup <dungeonId> <arena>` antes de rodar `setfloorspawn` pra editar a arena certa.
 
 #### Configuração de mobs: vanilla vs MythicMobs
 

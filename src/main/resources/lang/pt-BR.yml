@@ -185,6 +185,9 @@ setup:
 
   return_set: "&aReturn spawn setado. &7({loc})"
 
+  usage_setfloorspawn: "&cUse: &f/tower admin setfloorspawn <floor>"
+  floor_spawn_set: "&aSpawn do andar &f{floor}&a setado. &7({loc})"
+
   floor_invalid: "&cFloor inválido."
   mobspawn_no_mobs: "&cEsse andar não tem mobs configurados ainda (&f{floor}&c)."
   mobspawn_updated: "&aMob spawns atualizados no floor &f{floor}&a: &f{total} &aponto(s)."

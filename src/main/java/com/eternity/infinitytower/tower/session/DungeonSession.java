@@ -547,8 +547,13 @@ public final class DungeonSession {
 
         deadThisFloor.clear();
 
+        // ✅ floors.<n>.floor_spawn (opcional): teleporta todo mundo pra um local
+        // diferente nesse andar, simulando troca de arena/sala ao "subir" de andar.
+        // Se não configurado, mantém o spawn de entrada (comportamento de sempre).
+        Location floorSpawn = readArenaLocationSection(d, "floors." + floor + ".floor_spawn");
+
         forEachOnline(p -> {
-            Location entry = entrySpawnByPlayer.get(p.getUniqueId());
+            Location entry = floorSpawn != null ? floorSpawn : entrySpawnByPlayer.get(p.getUniqueId());
             if (entry == null) entry = (towerEntrySpawn != null ? towerEntrySpawn : getFallbackSpawn());
 
             forceAliveState(p);

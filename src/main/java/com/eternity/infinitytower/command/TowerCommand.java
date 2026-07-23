@@ -779,6 +779,33 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
 
+                    case "setfloorspawn" -> {
+                        if (!(sender instanceof Player p)) return true;
+                        SetupContext sc = setups.get(p.getUniqueId());
+                        if (sc == null) {
+                            p.sendMessage(lang("setup.save_not_in_setup", "&cVocê não está em setup."));
+                            return true;
+                        }
+
+                        if (args.length < 3) {
+                            p.sendMessage(lang("setup.usage_setfloorspawn", "&cUse: &f/tower admin setfloorspawn <floor>"));
+                            return true;
+                        }
+
+                        int floorArg;
+                        try { floorArg = Integer.parseInt(args[2]); }
+                        catch (Exception e) {
+                            p.sendMessage(lang("setup.floor_invalid", "&cFloor inválido."));
+                            return true;
+                        }
+                        if (floorArg < 1) floorArg = 1;
+
+                        setLocationSection(sc.cfg, sc.prefix + "floors." + floorArg + ".floor_spawn", p.getLocation());
+                        p.sendMessage(apply(lang("setup.floor_spawn_set", "&aSpawn do andar &f{floor}&a setado. &7({loc})"),
+                                Map.of("{floor}", String.valueOf(floorArg), "{loc}", fmt(p.getLocation()))));
+                        return true;
+                    }
+
                     case "setspawn" -> {
                         if (!(sender instanceof Player p)) return true;
                         SetupContext sc = setups.get(p.getUniqueId());
@@ -1006,6 +1033,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
             p.sendMessage(TextUtil.color("&f/tower admin addspawn solo|members"));
             p.sendMessage(TextUtil.color("&f/tower admin clearspawns solo|members"));
             p.sendMessage(TextUtil.color("&f/tower admin setreturn"));
+            p.sendMessage(TextUtil.color("&f/tower admin setfloorspawn <floor>"));
             p.sendMessage(TextUtil.color("&f/tower admin mobspawn add|set|clear <floor>"));
             p.sendMessage(TextUtil.color("&f/tower admin save &7/ &f/tower admin cancel"));
 
@@ -1188,7 +1216,7 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                 return filter(List.of(
                         "reload", "list", "create", "menu",
                         "setup", "where", "setspawn", "addspawn", "clearspawns",
-                        "setreturn", "mobspawn", "save", "cancel"
+                        "setreturn", "setfloorspawn", "mobspawn", "save", "cancel"
                 ), args[1]);
             }
 
@@ -1209,6 +1237,9 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                 if (a.equals("clearspawns")) return filter(List.of("solo", "members"), args[2]);
 
                 if (a.equals("mobspawn")) return filter(List.of("add", "set", "clear"), args[2]);
+                if (a.equals("setfloorspawn")) {
+                    return filter(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), args[2]);
+                }
             }
 
             if (args.length == 4) {

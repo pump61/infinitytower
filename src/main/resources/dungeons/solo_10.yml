@@ -62,6 +62,23 @@ titles:
     subtitle: "&#BEBEBEVoltando ao spawn..."
 
 floors:
+  # floors.<n>.floor_spawn (opcional, em qualquer andar): teleporta o(s) jogador(es)
+  # pra um local diferente só nesse andar, em vez de manter o spawn de entrada.
+  # Serve pra simular "subir de andar" trocando de sala/arena fisicamente:
+  # ex. andar 1 numa arena, andar 2 em outra, andar 3 de volta na primeira, etc.
+  # Usa o mesmo formato de "return_spawn". Configure com:
+  #   /tower admin setup solo_10
+  #   /tower admin setfloorspawn <floor>   (fica em pé no local e roda)
+  #   /tower admin save
+  #
+  # Exemplo (comentado — descomente e ajuste as coordenadas pra ativar):
+  # 1:
+  #   floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }
+  # 2:
+  #   floor_spawn: { world: world, x: 0.5, y: 100.0, z: 100.5 }   # "arena 2"
+  # 3:
+  #   floor_spawn: { world: world, x: 0.5, y: 100.0, z: 0.5 }     # volta pra "arena 1"
+
   1:
     mobs:
       - type: ZOMBIE
