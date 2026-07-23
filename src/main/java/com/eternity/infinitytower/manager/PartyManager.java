@@ -120,6 +120,12 @@ public final class PartyManager {
         // avisa antes (mantém membros no objeto)
         broadcastParty(party, "party_disbanded");
 
+        // ✅ ninguém deve continuar preso numa run cuja party não existe mais
+        for (UUID m : new ArrayList<>(party.getMembers())) {
+            Player p = Bukkit.getPlayer(m);
+            if (p != null && p.isOnline()) syncDungeonSessionLeave(p);
+        }
+
         // remove mappings e convites
         removeMappings(party);
 
@@ -136,6 +142,23 @@ public final class PartyManager {
             partyByPlayer.remove(m);
             clearInvite(m);
         }
+    }
+
+    // =========================
+    // SYNC COM DUNGEON EM ANDAMENTO
+    // =========================
+
+    /**
+     * Reflete uma saída/remoção da party numa dungeon em andamento:
+     * - se o jogador era o líder da SESSÃO (party run), encerra a run pra todo mundo.
+     * - se era só um membro da sessão, sai sozinho dela (resto continua).
+     * - se ele nem estava em nenhuma sessão, não faz nada.
+     */
+    private void syncDungeonSessionLeave(Player player) {
+        try {
+            var sessionManager = plugin.getInfinityTowerManager().getSessionManager();
+            if (sessionManager != null) sessionManager.leavePlayer(player);
+        } catch (Throwable ignored) {}
     }
 
     // =========================
@@ -309,6 +332,12 @@ public final class PartyManager {
         // ✅ confirma pro próprio jogador que ele saiu — sem isso, quem saía não recebia nenhuma mensagem
         player.sendMessage(msg("party_you_left"));
 
+        // ✅ sincroniza com uma dungeon em andamento: se ele era o líder da SESSÃO,
+        // encerra a run pra todo mundo; se era só um membro, sai sozinho dela.
+        // Sem isso, sair da party não tirava ninguém da run — o jogador continuava
+        // "preso" na dungeon (e por tabela, indisponível pra ser convidado de novo).
+        syncDungeonSessionLeave(player);
+
         if (party.size() <= 1) {
             disbandParty(party);
             return;
@@ -365,6 +394,9 @@ public final class PartyManager {
         clearInvite(target.getUniqueId());
 
         target.sendMessage(msg("party_kicked"));
+
+        // ✅ mesma sincronização do leave(): expulso não pode continuar preso na run
+        syncDungeonSessionLeave(target);
 
         if (party.size() <= 1) {
             disbandParty(party);

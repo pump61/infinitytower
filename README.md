@@ -502,6 +502,7 @@ Fluxo típico para configurar uma dungeon dentro do jogo, sem editar YAML manual
 - Desconexão do líder desfaz a party; desconexão de membro o remove (e desfaz se sobrar só 1).
 - Ao sair um líder sem desfazer a party, a liderança passa automaticamente para outro membro.
 - `PartyFriendlyFireListener` evita dano entre membros da mesma party.
+- **Sair/ser expulso da party sincroniza com uma dungeon em andamento.** `/tower party leave`, `/tower party kick` e `/tower party disband` chamam a mesma lógica de saída de sessão usada por `/tower leave`: se o jogador afetado era o **líder da sessão** (a run em PARTY), a dungeon é encerrada pra todo mundo; se era só um membro da sessão, ele sai sozinho dela (o resto continua). Sem isso, sair da party não tirava ninguém da run em andamento.
 
 ## Banco de dados
 

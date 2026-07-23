@@ -195,7 +195,8 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                     }
 
                     case "leave" -> {
-                        // ✅ sair da PARTY (não cancela dungeon)
+                        // ✅ sair da PARTY — também sincroniza com uma dungeon em andamento
+                        // (se líder da sessão, encerra pra todo mundo; se membro, sai sozinho)
                         plugin.getPartyManager().leave(player);
                         return true;
                     }
