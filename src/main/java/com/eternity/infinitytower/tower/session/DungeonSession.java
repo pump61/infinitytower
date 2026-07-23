@@ -1173,6 +1173,8 @@ public final class DungeonSession {
             }
         }
 
+        announceSessionEnded(reason);
+
         stopFloorMonitor();
         clearTrackedMobs();
 
@@ -1194,6 +1196,41 @@ public final class DungeonSession {
         entrySpawnByPlayer.clear();
 
         plugin.getInfinityTowerManager().getSessionManager().removeSession(this);
+    }
+
+    /**
+     * Title avisando o motivo do encerramento pros jogadores que ainda estão online
+     * na sessão (ex: o líder saiu/desconectou e a run acabou pra todo mundo).
+     * ERROR e FINISH não passam por aqui — já têm suas próprias mensagens/title.
+     * Configurável por dungeon em titles.session_ended_leave/disconnect/shutdown
+     * (mesmo esquema de titles.completed), com fallback pro lang e depois hardcoded.
+     */
+    private void announceSessionEnded(EndReason reason) {
+        String group = switch (reason) {
+            case LEAVE -> "session_ended_leave";
+            case DISCONNECT -> "session_ended_disconnect";
+            case SHUTDOWN -> "session_ended_shutdown";
+            default -> null; // ERROR / FINISH já tratam sua própria mensagem
+        };
+        if (group == null) return;
+
+        String subtitleDef = switch (reason) {
+            case LEAVE -> "&7O líder saiu da dungeon.";
+            case DISCONNECT -> "&7O líder desconectou.";
+            case SHUTDOWN -> "&7O servidor está reiniciando.";
+            default -> "";
+        };
+
+        FileConfiguration d = dungeon();
+
+        String titleRaw = (d != null) ? d.getString("titles." + group + ".title") : null;
+        String subtitleRaw = (d != null) ? d.getString("titles." + group + ".subtitle") : null;
+
+        if (titleRaw == null || titleRaw.isBlank()) titleRaw = titleDefault(group + ".title", "&c&lRun Encerrada");
+        if (subtitleRaw == null || subtitleRaw.isBlank()) subtitleRaw = subtitleDefault(group + ".subtitle", subtitleDef);
+
+        sendTitleToAll(titleRaw, subtitleRaw);
+        broadcast(msg(group, subtitleDef));
     }
 
     private void clearTrackedMobs() {

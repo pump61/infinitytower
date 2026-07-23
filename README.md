@@ -271,8 +271,13 @@ Dois grupos de titles existem: os de **nível raiz** (só podem ser definidos um
 | `titles.floor_cleared` / `floors.<n>.titles.floor_cleared` | raiz + por-andar | Andar limpo e o **próximo** andar NÃO é boss | `{floor}` (andar limpo), `{delay}` = `next_floor_delay_seconds`, `{boss_name}` |
 | `titles.next_is_boss` / `floors.<n>.titles.next_is_boss` | raiz + por-andar | Andar limpo e o **próximo** andar É boss (usa os textos do andar de boss que vem a seguir) | `{floor}` (andar limpo), `{delay}` = `next_floor_delay_seconds`, `{boss_name}` (do próximo andar) |
 | `titles.completed` | só raiz | Dungeon inteira concluída (passou do `max_floors`) | `{dungeon}` = `display` |
+| `titles.session_ended_leave` | só raiz | O líder da sessão saiu (`/tower party leave`/`/tower leave`) — run cancelada pra todo mundo | — |
+| `titles.session_ended_disconnect` | só raiz | O líder da sessão desconectou — run cancelada pra todo mundo | — |
+| `titles.session_ended_shutdown` | só raiz | Plugin/servidor desligando com a run em andamento | — |
 
-Os templates padrão (`solo_10.yml`/`party_10.yml`) só configuram `on_enter`, `preparing`, `floor_cleared` e `completed` — `floor_started`, `boss_floor_started` e `next_is_boss` funcionam com o texto padrão do idioma até você querer customizá-los.
+Os templates padrão (`solo_10.yml`/`party_10.yml`) só configuram `on_enter`, `preparing`, `floor_cleared` e `completed` — os demais (incluindo os três `session_ended_*`) funcionam com o texto padrão do idioma até você querer customizá-los.
+
+Os três `session_ended_*` também mandam a mesma mensagem no chat (`messages.session_ended_leave`/`_disconnect`/`_shutdown`) pra quem não estiver olhando pro title. Isso resolve o problema de sair/desconectar como líder deixando os outros jogadores sem nenhum aviso do porquê a dungeon acabou de repente.
 
 **Andar de boss**, exemplo:
 

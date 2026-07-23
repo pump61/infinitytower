@@ -204,11 +204,11 @@ public final class TowerCommand implements CommandExecutor, TabCompleter {
                     case "disband" -> {
                         Party party = plugin.getPartyManager().getParty(player.getUniqueId());
                         if (party == null) {
-                            player.sendMessage(lang("messages.party_not_in_party", "&cVocê não está em party."));
+                            player.sendMessage(lang("party.party_not_in_party", "&cVocê não está em party."));
                             return true;
                         }
                         if (!party.isLeader(player.getUniqueId())) {
-                            player.sendMessage(lang("messages.party_only_leader_disband", "&cApenas o líder pode desfazer a party."));
+                            player.sendMessage(lang("party.party_only_leader_disband", "&cApenas o líder pode desfazer a party."));
                             return true;
                         }
 

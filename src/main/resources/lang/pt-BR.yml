@@ -14,6 +14,15 @@ titles:
   completed:
     title: "&#00FF7FDungeon Concluída!"
     subtitle: "&#BEBEBEVoltando ao spawn..."
+  session_ended_leave:
+    title: "&c&lRun Encerrada"
+    subtitle: "&7O líder saiu da dungeon."
+  session_ended_disconnect:
+    title: "&c&lRun Encerrada"
+    subtitle: "&7O líder desconectou."
+  session_ended_shutdown:
+    title: "&c&lRun Encerrada"
+    subtitle: "&7O servidor está reiniciando."
 
 messages:
   only_players: "&cApenas jogadores podem usar este comando."
@@ -24,6 +33,9 @@ messages:
   dungeon_not_found: "&cDungeon não encontrada: &f{dungeon}"
   dungeon_all_dead: "&cTodos morreram. A dungeon falhou!"
   floor_spawn_failed: "&cFalha ao spawnar mobs deste andar (&f{floor}&c). Dungeon encerrada."
+  session_ended_leave: "&cA run foi encerrada — o líder saiu da dungeon."
+  session_ended_disconnect: "&cA run foi encerrada — o líder desconectou."
+  session_ended_shutdown: "&cA run foi encerrada — o servidor está reiniciando."
   floor_no_mobs: "&cAndar configurado sem mobs (&f{floor}&c). Dungeon encerrada."
   floor_mobs_actionbar: "&cMobs restantes: &f{count}"
   reward_invalid_item: "&cItem de recompensa inválido: &f{item}"
