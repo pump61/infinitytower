@@ -425,6 +425,7 @@ Regras e comportamento de ambos os formatos:
 - Um andar sem nenhum mob válido spawnado encerra a run automaticamente se `allow_empty_floors: false`.
 - Em **arenas alternativas** (`<id>_arena2`, etc.), a lista `floors.<n>.mobs` da arena normalmente só reescreve `spawns` (mesma ordem/índice da lista raiz) — `type`/`mythic`/`amount` continuam vindo da definição raiz.
 - **Os mobs sempre nascem já perseguindo alguém da sessão** — assim que spawnam (e a cada 1s depois, junto do monitor de andar), o plugin define via `Mob#setTarget(...)` o jogador vivo mais próximo (dentre os da própria sessão) como alvo. Isso é forçado independente da IA vanilla de detecção por distância/visão — então, mesmo que `floor_spawn`/`return_spawn` do jogador fique longe de onde o mob nasceu (`spawns`), o mob ainda vai perseguir o jogador em vez de ficar parado. Se o alvo morrer/sair, um novo alvo é escolhido no próximo tick do monitor.
+- **Mobs da dungeon não brigam entre si.** `MobFriendlyFireListener` cancela qualquer dano entre dois mobs marcados como da dungeon (inclusive por flecha/projétil) — sem isso, a IA vanilla (`HurtByTargetGoal`) faria um esqueleto que acertasse um zumbi por acidente passar a mirar nele em vez de no jogador.
 
 #### Arenas alternativas e dungeons extra
 

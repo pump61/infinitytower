@@ -9,6 +9,7 @@ import com.eternity.infinitytower.dungeon.DungeonRegistry;
 import com.eternity.infinitytower.listener.CommandWhitelistListener;
 import com.eternity.infinitytower.listener.MainMenuListener;
 import com.eternity.infinitytower.listener.MenuListener;
+import com.eternity.infinitytower.listener.MobFriendlyFireListener;
 import com.eternity.infinitytower.listener.PartyFriendlyFireListener;
 import com.eternity.infinitytower.listener.PlayerConnectionListener;
 import com.eternity.infinitytower.listener.StatsMenuListener;
@@ -88,6 +89,7 @@ public final class InfinityTower extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new StatsMenuListener(this), this);
 
         getServer().getPluginManager().registerEvents(new PartyFriendlyFireListener(this), this);
+        getServer().getPluginManager().registerEvents(new MobFriendlyFireListener(this), this);
 
         // ✅ BLOQUEIO DE COMANDOS NA DUNGEON (guarda referência p/ blockBackFor)
         this.commandWhitelistListener = new CommandWhitelistListener(this);
