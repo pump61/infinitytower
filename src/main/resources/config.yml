@@ -8,6 +8,10 @@ prefix: "&bInfinityTower &8» "
 # =====================================================
 tower:
 
+  # Delay (segundos) antes de teleportar o player pra arena ao entrar na dungeon
+  # (serve para dar tempo de carregar chunks / preparar HUD / etc)
+  enter_teleport_delay_seconds: 3
+
   title_times:
 
     # Tempo de fade-in (ticks)
@@ -140,10 +144,6 @@ database:
     user: "root"
     password: ""
     useSSL: false
-
-  # ✅ NOVO: delay global antes de teleportar o player pra arena
-  # (serve para dar tempo de carregar chunks / preparar HUD / etc)
-  enter_teleport_delay_seconds: 3
 
 # =====================================================
 # Sistema de Debug

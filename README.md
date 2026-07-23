@@ -133,9 +133,9 @@ Principais chaves:
 - `tower.tracking.spawn_radius` — raio (em blocos) para capturar minions gerados por mobs do MythicMobs (ex.: adds de um boss) como parte do andar.
 - `dungeon.command_whitelist` — lista de comandos permitidos dentro da dungeon (o resto é bloqueado por `CommandWhitelistListener`).
 - `main-menu` / `stats-menu` — variante alternativa de menu (o layout "oficial" usado em runtime é `menus.yml`; estas seções ficam como referência/legado).
-- `spawn` — spawn global de fallback quando uma dungeon não tem `return_spawn` configurado.
+- `tower.enter_teleport_delay_seconds` — delay global (segundos), aplicado a **todas** as dungeons, entre abrir o menu/clicar e teleportar o jogador para a arena (dá tempo de carregar chunks, HUD, etc.). Padrão: `2` se a chave não existir.
+- `spawn` — spawn global de fallback quando uma dungeon não tem `return_spawn`/`player_spawns` configurado (ou o mundo configurado não existe).
 - `database.*` — ver seção [Banco de dados](#banco-de-dados).
-- `database.enter_teleport_delay_seconds` — delay (segundos) antes de teleportar o jogador para a arena ao entrar.
 - `debug.enabled` — liga logs extras de depuração.
 
 ### `menus.yml`
@@ -152,29 +152,158 @@ Cada item aceita `material`, `name`, `lore`, `custom_model_data` e (nos menus de
 
 Todas as mensagens do plugin, organizadas em seções: `titles` (titles de tela), `messages` (mensagens gerais), `party` (sistema de party), `usage` (mensagens de uso incorreto), `help` (texto de `/tower help`), `database`, `setup` e `logs` (mensagens de console). Edite livremente — os placeholders `{...}` de cada linha são substituídos pelo código na hora do envio.
 
-### Dungeons (`dungeons/<id>.yml`)
+### Dungeons / mapas (`dungeons/<id>.yml`)
 
-Cada arquivo YAML descreve uma dungeon. Chaves principais:
+Cada arquivo YAML dentro de `plugins/InfinityTower/dungeons/` descreve um **mapa/dungeon** completo: identidade, chave de acesso, spawns, titles, e o conteúdo de cada andar (mobs + recompensas). O nome do arquivo (sem `.yml`) vira o `dungeonId` usado em `/tower give key`, `/tower top`, `/tower record`, `/tower admin setup`, etc. Um mesmo arquivo também pode conter **arenas alternativas** e **dungeons extras** — ver [Arenas alternativas e dungeons extra](#arenas-alternativas-e-dungeons-extra) mais abaixo.
 
-| Chave | Descrição |
-|---|---|
-| `display` | Nome exibido (aceita cor `&`/hex `&#RRGGBB`) |
-| `max_floors` | Quantidade de andares |
-| `mode` | `SOLO` ou `PARTY` |
-| `allow_solo_in_party` | Permite iniciar dungeon SOLO estando na PARTY |
-| `next_floor_delay_seconds` | Delay entre andares |
-| `start_delay_seconds` | Delay ao entrar antes do 1º andar |
-| `allow_empty_floors` | Se `false`, andar sem mob configurado cancela a run |
-| `access.require_key` / `access.consume_key` | Exige e/ou consome chave para entrar |
-| `access.key.*` | Aparência do item-chave (`material`, `name`, `lore`, `custom-model-data`, `glow`) — placeholders `{id} {display} {max_floors}` |
-| `access.limiter.enabled` / `cooldown_seconds` / `max_entries_per_day` | Cooldown e limite diário de entradas por jogador |
-| `menu-item.*` | Aparência do item representando a dungeon no menu |
-| `player_spawns` | Lista de spawns (modo solo, um por tentativa) |
-| `party_leader_spawn` / `party_member_spawns` | Spawns específicos do modo party |
-| `return_spawn` | Local de retorno ao concluir/sair (cai no `spawn` global do `config.yml` se ausente) |
-| `titles.preparing` / `on_enter` / `floor_cleared` / `completed` | Titles específicos da dungeon (placeholders `{delay} {floor} {dungeon}`) |
-| `floors.<n>.mobs` | Lista de mobs do andar `n` — ver [Configuração de mobs](#configuração-de-mobs-vanilla-vs-mythicmobs) abaixo |
-| `floors.<n>.rewards` | `enabled`, `items` (lista `type`/`amount`) e/ou `commands` (executados como console, com `{player}`) |
+#### Referência completa de chaves (nível raiz)
+
+| Chave | Tipo | Padrão | Descrição |
+|---|---|---|---|
+| `display` | texto | `id do arquivo` | Nome exibido (aceita `&cor` e hex `&#RRGGBB`). Usado no menu, no item-chave, em `/tower top`/`/tower record` e no placeholder `{dungeon}` do title de conclusão |
+| `mode` | `SOLO` ou `PARTY` | `SOLO` | Define em qual menu (`/tower menu solo` ou `/tower menu party`) a dungeon aparece e as regras de entrada — ver [Acesso e regras solo/party](#acesso-e-regras-soloparty) |
+| `max_floors` | número | `10` | Quantidade de andares; ao passar do último a dungeon é finalizada (`onFloorCleared` detecta `floor > max_floors`) |
+| `allow_empty_floors` | `true`/`false` | `false` | Se `false`, um andar sem nenhum mob configurado (ou cujos mobs falharem ao spawnar) **cancela a run** com a mensagem `floor_no_mobs`/`floor_spawn_failed`. Se `true`, o andar é tratado como "vazio" e a run segue |
+| `start_delay_seconds` | segundos | `10` | Tempo entre o title `on_enter` (ao clicar pra entrar) e o início efetivo do andar 1 — durante esse tempo o title `preparing` também é mostrado |
+| `next_floor_delay_seconds` | segundos | `5` | Tempo de espera entre um andar ser limpo e o próximo começar |
+| `allow_solo_in_party` | `true`/`false` | — | **Presente nos templates, mas não lido em nenhum lugar do código atual** (chave reservada/sem efeito hoje). Quem realmente decide se é permitido jogar sozinho é o `mode` da dungeon — veja a tabela da próxima seção |
+| `access.*` | seção | — | Chave de acesso e limitador de entradas — ver [Acesso e entrada](#acesso-e-entrada-chaves-e-limitador) |
+| `menu-item.*` | seção | — | Ícone da dungeon nos menus solo/party — ver [Aparência no menu](#aparência-no-menu-menu-item) |
+| `player_spawns` | lista de locais | — | Pontos de spawn ao entrar **sozinho** (SOLO, ou PARTY sem estar em party) — um é sorteado aleatoriamente a cada entrada |
+| `party_leader_spawn` | local único | — | Spawn do **líder** quando a run é iniciada em party |
+| `party_member_spawns` | lista de locais | — | Spawns dos **membros** (não-líder) em uma run de party — um é sorteado aleatoriamente por membro |
+| `return_spawn` | local único | cai no `spawn` global do `config.yml` | Para onde o(s) jogador(es) voltam ao concluir a dungeon, morrer (fim de run) ou usar `/tower leave` |
+| `titles.*` | seção | — | Textos de title/subtitle da dungeon — ver [Titles e andar de boss](#titles-e-andar-de-boss) |
+| `floors.<n>.mobs` | lista | — | Mobs do andar `n` — ver [Configuração de mobs](#configuração-de-mobs-vanilla-vs-mythicmobs) |
+| `floors.<n>.boss` | `true`/`false` | `false` | Marca o andar `n` como andar de boss — troca os titles usados (ver titles) |
+| `floors.<n>.boss_name` | texto | `""` | Preenche o placeholder `{boss_name}` nos titles desse andar |
+| `floors.<n>.titles.*` | seção | — | Override de title **somente para esse andar** — mesmos grupos de `titles.*` (menos `on_enter`/`preparing`/`completed`, que são só de nível raiz) |
+| `floors.<n>.rewards` | seção | — | Recompensas ao limpar o andar — ver [Recompensas](#recompensas-por-andar) |
+
+Cada uma dessas áreas é detalhada nas subseções abaixo.
+
+#### Fluxo de execução de uma run
+
+Sequência real de eventos (código: [`DungeonSession`](src/main/java/com/eternity/infinitytower/tower/session/DungeonSession.java)), do clique no menu até o fim:
+
+1. Jogador clica na dungeon no menu → checagem de acesso (chave/limiter, ver abaixo) → `DungeonSession.start()`.
+2. Title `titles.on_enter` é mostrado imediatamente.
+3. Espera `tower.enter_teleport_delay_seconds` (config.yml, global).
+4. Jogador(es) são teleportados para `player_spawns` (solo) ou `party_leader_spawn`/`party_member_spawns` (party).
+5. Title `titles.preparing` é mostrado (placeholders `{floor}`=1, `{delay}`=`start_delay_seconds`).
+6. Espera `start_delay_seconds`.
+7. Andar 1 começa: mobs do `floors.1.mobs` são spawnados; title `floor_started`/`boss_floor_started` (conforme `floors.1.boss`) é mostrado.
+8. Quando todos os mobs do andar morrem: `floors.<n>.rewards` é entregue a quem está vivo → a cada 10 andares limpos (10, 20, 30…) é feito um **broadcast pro servidor inteiro** (`messages.dungeon_broadcast_floor10`) → title `floor_cleared`/`next_is_boss` (conforme o **próximo** andar ser boss) é mostrado → espera `next_floor_delay_seconds` → repete a partir do passo 7 para o próximo andar.
+9. Se **todos** os jogadores online morrerem no mesmo andar antes de limpá-lo, a run falha (`dungeon_all_dead`) e encerra.
+10. Ao limpar o último andar (`floor > max_floors`): title `titles.completed` (placeholder `{dungeon}` = `display`) e teleporte para `return_spawn`.
+11. `/tower leave` a qualquer momento também encerra a run e teleporta para `return_spawn`.
+
+#### Acesso e regras solo/party
+
+O `mode` da dungeon decide o comportamento no menu (código: [`MenuListener`](src/main/java/com/eternity/infinitytower/listener/MenuListener.java)):
+
+| `mode` | Jogador sem party | Jogador em party (líder) | Jogador em party (membro) |
+|---|---|---|---|
+| `SOLO` | Entra normalmente sozinho | **Bloqueado** — mensagem `solo_requires_no_party` (precisa sair da party) | Bloqueado (mesma regra) |
+| `PARTY` | Entra sozinho (run "solo" numa dungeon party) | Inicia a run **para toda a party** | Bloqueado no menu — só o líder inicia (`party_only_leader_start_menu`) |
+
+O menu solo só lista dungeons `mode: SOLO`; o menu party só lista `mode: PARTY` — dá pra ter as duas versões da "mesma" dungeon (uma de cada `mode`) usando o recurso de [dungeons extra](#arenas-alternativas-e-dungeons-extra) no mesmo arquivo, se quiser.
+
+#### Acesso e entrada (chaves e limitador)
+
+```yaml
+access:
+  require_key: true       # exige o item-chave no inventário pra entrar
+  consume_key: true        # consome 1 unidade da chave ao entrar (ignorado se require_key: false)
+  key:
+    material: PAPER
+    custom-model-data: 10133
+    name: "&bChave da {display}"
+    lore:
+      - "&7Acesso: &f{id}"
+      - "&7Andares: &f{max_floors}"
+    glow: true              # brilho falso (encantamento oculto), não é um encantamento real
+  limiter:
+    enabled: false
+    cooldown_seconds: 0        # 0 = sem cooldown entre entradas
+    max_entries_per_day: 0     # 0 = sem limite diário
+```
+
+- A chave (`access.key`) é só **aparência** de item (material/nome/lore/model data/glow) — a identificação real de "isso é a chave da dungeon X" é feita via `PersistentDataContainer`, não pelo material. `{id}`, `{display}` e `{max_floors}` são substituídos na hora de gerar o item (`/tower give key`, `/tower giveall key`).
+- Sem `access.key` configurado, `/tower give key` avisa `key_not_configured` e não entrega nada.
+- `access.limiter` é por jogador e por dungeon: `cooldown_seconds` bloqueia reentrada por N segundos após sair, `max_entries_per_day` conta entradas que resetam à meia-noite (hora do servidor). Os dois podem ser usados juntos.
+- Ordem de checagem ao entrar: **chave presente?** → **limiter (cooldown/limite diário) OK?** → **consome a chave** (se `consume_key: true`). Se qualquer etapa falhar, o jogador não entra e nada é consumido.
+
+#### Aparência no menu (`menu-item`)
+
+```yaml
+menu-item:
+  material: ENDER_EYE
+  custom-model-data: 0
+  name: "&a&l{display}"
+  lore:
+    - "&7Modo: &f{mode}"
+    - "&7Andares: &f{max_floors}"
+```
+
+- Se a dungeon **não** tiver `menu-item`, o menu usa o template padrão em `menus.yml` (`menus.solo.dungeon-item` / `menus.party.dungeon-item`) — então normalmente você só precisa definir `menu-item` quando quiser um ícone **diferente** do padrão para aquela dungeon específica.
+- Truque para **esconder** uma dungeon do menu sem excluí-la: configure `menu-item.material: AIR` (ou o template padrão como `AIR`) — a dungeon é pulada na montagem do menu, mas continua jogável via `/tower menu solo|party` administrativo, `/tower give key`, etc.
+- Placeholders disponíveis no `name`/`lore`: `{id}`, `{display}`, `{mode}`, `{max_floors}`.
+
+#### Titles e andar de boss
+
+Dois grupos de titles existem: os de **nível raiz** (só podem ser definidos uma vez, no topo do arquivo) e os **por-andar-com-fallback-pro-raiz** (podem ser sobrescritos por andar específico em `floors.<n>.titles.<grupo>`, caindo para `titles.<grupo>` da raiz se o andar não tiver override, e caindo para um texto padrão do `lang/pt-BR.yml` se nem a raiz tiver).
+
+| Grupo | Nível | Quando aparece | Placeholders |
+|---|---|---|---|
+| `titles.on_enter` | só raiz | Ao clicar pra entrar, antes do teleporte | `{floor}` (sempre 1), `{delay}` = `start_delay_seconds` |
+| `titles.preparing` | só raiz | Logo após o teleporte, antes do andar 1 começar | `{floor}` (sempre 1), `{delay}` = `start_delay_seconds` |
+| `titles.floor_started` / `floors.<n>.titles.floor_started` | raiz + por-andar | Início de um andar **normal** (`floors.<n>.boss` ausente/`false`) | `{floor}`, `{boss_name}` |
+| `titles.boss_floor_started` / `floors.<n>.titles.boss_floor_started` | raiz + por-andar | Início de um andar marcado `boss: true` | `{floor}`, `{boss_name}` |
+| `titles.floor_cleared` / `floors.<n>.titles.floor_cleared` | raiz + por-andar | Andar limpo e o **próximo** andar NÃO é boss | `{floor}` (andar limpo), `{delay}` = `next_floor_delay_seconds`, `{boss_name}` |
+| `titles.next_is_boss` / `floors.<n>.titles.next_is_boss` | raiz + por-andar | Andar limpo e o **próximo** andar É boss (usa os textos do andar de boss que vem a seguir) | `{floor}` (andar limpo), `{delay}` = `next_floor_delay_seconds`, `{boss_name}` (do próximo andar) |
+| `titles.completed` | só raiz | Dungeon inteira concluída (passou do `max_floors`) | `{dungeon}` = `display` |
+
+Os templates padrão (`solo_10.yml`/`party_10.yml`) só configuram `on_enter`, `preparing`, `floor_cleared` e `completed` — `floor_started`, `boss_floor_started` e `next_is_boss` funcionam com o texto padrão do idioma até você querer customizá-los.
+
+**Andar de boss**, exemplo:
+
+```yaml
+floors:
+  10:
+    boss: true
+    boss_name: "&4&lRei Esqueleto"
+    titles:
+      boss_floor_started:
+        title: "&4&l{boss_name}"
+        subtitle: "&cSobreviva!"
+    mobs:
+      - mythic: SkeletonKing
+        amount: 1
+        spawns: [...]
+```
+
+Configurar `floors.<n>.boss: true` sem `titles` próprios ainda troca automaticamente o title exibido para o grupo `boss_floor_started`/`next_is_boss` (usando o texto padrão de `titles.boss_floor_started` da raiz, se existir, senão o do `lang/pt-BR.yml`).
+
+#### Recompensas por andar
+
+```yaml
+floors:
+  1:
+    rewards:
+      enabled: true
+      items:
+        - type: DIAMOND
+          amount: 1
+      commands:
+        - "give {player} emerald 2"
+        - "broadcast &6{player} completou o andar!"
+```
+
+- `enabled` — se `false` (ou a seção `rewards` ausente), nada é entregue nesse andar.
+- `items` — lista de `type` (nome de `Material`) + `amount`; é adicionado ao inventário do jogador, e o que não couber **cai no chão** aos pés dele. `type` inválido loga `reward_invalid_item` e pula aquele item.
+- `commands` — executados pelo **console** (`Bukkit.dispatchCommand` com o console sender), um por linha, com `{player}` substituído pelo nome do jogador.
+- Só recebem recompensa os jogadores **online e vivos** no momento em que o andar foi limpo — quem morreu naquele andar (`deadThisFloor`) fica de fora dessa rodada de recompensas (mas volta a receber nos andares seguintes, se reviver como espectador do resto da run normalmente).
 
 #### Configuração de mobs: vanilla vs MythicMobs
 
@@ -256,9 +385,51 @@ Regras e comportamento de ambos os formatos:
 - Um andar sem nenhum mob válido spawnado encerra a run automaticamente se `allow_empty_floors: false`.
 - Em **arenas alternativas** (`<id>_arena2`, etc.), a lista `floors.<n>.mobs` da arena normalmente só reescreve `spawns` (mesma ordem/índice da lista raiz) — `type`/`mythic`/`amount` continuam vindo da definição raiz.
 
-**Arenas alternativas:** dentro do mesmo arquivo, uma seção top-level `<dungeonId>_arena2` (ou `arena3`, etc.) sobrescreve apenas os campos informados (tipicamente spawns e `floors.<n>.mobs[].spawns`) por cima da configuração raiz — útil para ter várias instâncias físicas da mesma dungeon sem duplicar todo o YAML. Use `/tower admin setup <dungeonId> <arena>` para editar uma arena específica.
+#### Arenas alternativas e dungeons extra
 
-**Dungeons "extra" no mesmo arquivo:** uma seção top-level que não seja `..._arenaN` e que contenha `player_spawns`/`return_spawn`/`floors`/`mode`/`display` é registrada como uma dungeon independente (id = nome da seção), reaproveitando o resto do arquivo como base.
+Um mesmo arquivo `dungeons/<id>.yml` pode conter mais conteúdo além da dungeon principal, através de seções top-level (mesmo nível de `display`/`floors`/etc.):
+
+**Arenas alternativas** — seção `<dungeonId>_arena2` (`_arena3`, `_arena4`, ...). Pense nisso como "a mesma dungeon, mas rodando em outro lugar do mapa" (útil pra ter N instâncias físicas simultâneas sem duplicar todo o YAML e sem duplicar o histórico/ranking, que continua contando pro `dungeonId` original). A arena sobrescreve **só o que for informado** por cima da configuração raiz — na prática, isso costuma ser:
+
+```yaml
+solo_10_arena2:
+  player_spawns: [...]
+  return_spawn: {...}
+  party_leader_spawn: {...}      # se for dungeon PARTY
+  party_member_spawns: [...]     # se for dungeon PARTY
+  floors:
+    1:
+      mobs:
+        - spawns: [...]         # só "spawns" — type/mythic/amount continuam vindo da raiz
+    2:
+      mobs:
+        - spawns: [...]
+```
+
+- Em `floors.<n>.mobs` da arena, cada entrada é combinada **pelo índice** com a lista raiz (a 1ª entrada da arena sobrescreve o `spawns` da 1ª entrada da raiz, e assim por diante) — só `spawns` é lido da arena, `type`/`mythic`/`amount`/`equipment` sempre vêm da definição raiz do andar.
+- `/tower admin setup <dungeonId> <arena>` (ex.: `arena2` ou só `2`) abre a sessão de setup apontando pra essa seção, então `setspawn`/`addspawn`/`setreturn`/`mobspawn` editam a arena, não a raiz.
+- Se a seção da arena não existir ainda no arquivo, `/tower admin setup <dungeonId> <arena>` cria ela vazia na hora de salvar.
+
+**Dungeons extra** — qualquer outra seção top-level (que não siga o padrão `..._arenaN`) contendo pelo menos uma destas chaves: `player_spawns`, `return_spawn`, `floors`, `mode` ou `display`. Vira uma dungeon **completamente independente** (com seu próprio `dungeonId` = nome da seção, seu próprio ranking, sua própria entrada em `/tower admin list`), mas reaproveitando como base tudo que não for sobrescrito na seção. Exemplo prático: uma versão "hard" da mesma torre, no mesmo arquivo:
+
+```yaml
+# solo_10.yml
+display: "&bTorre Solo"
+mode: SOLO
+floors: {...}
+# ...
+
+solo_10_hard:
+  display: "&cTorre Solo (Difícil)"
+  floors:
+    1:
+      mobs:
+        - type: ZOMBIE
+          amount: 10          # muito mais mobs que a versão normal
+          spawns: [...]
+```
+
+Diferente da arena, aqui você normalmente quer sobrescrever `floors` inteiro (não só `spawns`), já que é uma dungeon com identidade própria, não uma cópia física da mesma.
 
 ## Setup de arenas (admin)
 
