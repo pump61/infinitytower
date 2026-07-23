@@ -306,6 +306,9 @@ public final class PartyManager {
         partyByPlayer.remove(id);
         clearInvite(id);
 
+        // ✅ confirma pro próprio jogador que ele saiu — sem isso, quem saía não recebia nenhuma mensagem
+        player.sendMessage(msg("party_you_left"));
+
         if (party.size() <= 1) {
             disbandParty(party);
             return;

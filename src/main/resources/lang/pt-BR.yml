@@ -106,6 +106,7 @@ party:
   party_invite_expired_target: "&7Convite de party de &f{player} &7expirou."
   party_player_joined: "&a{player} entrou na party. &7({size}/{max})"
   party_player_left: "&e{player} saiu da party. &7({size}/{max})"
+  party_you_left: "&eVocê saiu da party."
   party_kicked: "&cVocê foi expulso da party."
   party_player_kicked: "&e{player} foi expulso. &7({size}/{max})"
   party_leadership_transferred: "&eLiderança transferida para &f{player}"
