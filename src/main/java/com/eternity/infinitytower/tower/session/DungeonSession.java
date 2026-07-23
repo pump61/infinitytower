@@ -600,6 +600,8 @@ public final class DungeonSession {
 
         // ✅ NOVO: anúncio de início do andar (normal ou boss)
         announceFloorStart(d, floor);
+
+        updateMobsActionBar();
     }
 
     private int countExpectedMobs(ConfigurationSection floorSec) {
@@ -631,6 +633,7 @@ public final class DungeonSession {
 
             pruneMobsSet();
             retargetMobsIfNeeded();
+            updateMobsActionBar();
 
             if (mobs.isEmpty()) {
                 FileConfiguration d = dungeon();
@@ -686,6 +689,17 @@ public final class DungeonSession {
         }
 
         return best;
+    }
+
+    // =========================
+    // ACTIONBAR: MOBS RESTANTES
+    // =========================
+
+    private void updateMobsActionBar() {
+        String text = msg("floor_mobs_actionbar", "&cMobs restantes: &f{count}",
+                Map.of("count", String.valueOf(mobs.size())));
+
+        forEachOnline(p -> p.sendActionBar(text));
     }
 
     private void stopFloorMonitor() {

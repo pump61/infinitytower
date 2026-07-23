@@ -135,6 +135,7 @@ Principais chaves:
 - `prefix` — prefixo usado em mensagens gerais.
 - `tower.title_times` — `fade_in_ticks` / `stay_ticks` / `fade_out_ticks` dos titles de andar/entrada/conclusão.
 - `tower.tracking.spawn_radius` — raio (em blocos) para capturar minions gerados por mobs do MythicMobs (ex.: adds de um boss) como parte do andar.
+- `tower.tracking.allowed_spawn_reasons` — lista de `CreatureSpawnEvent.SpawnReason` que contam pro raio acima (padrão: `[CUSTOM, SPAWNER]`). Mobs selvagens comuns nascem com motivo `NATURAL` (fora da lista por padrão), então nunca entram no rastreamento só por estarem perto da arena — só invocações "artificiais" (skills do MythicMobs, spawners, etc.) contam.
 - `dungeon.command_whitelist` — lista de comandos permitidos dentro da dungeon (o resto é bloqueado por `CommandWhitelistListener`).
 - `main-menu` (ou `main_menu`) — controla o **menu principal** (`/tower menu`): botões **Solo**/**Party**, filler, título. Essa é a única fonte real desse menu (ver correção na seção [`menus.yml`](#menusyml) logo abaixo).
 - `tower.enter_teleport_delay_seconds` — delay global (segundos), aplicado a **todas** as dungeons, entre abrir o menu/clicar e teleportar o jogador para a arena (dá tempo de carregar chunks, HUD, etc.). Padrão: `2` se a chave não existir.
@@ -426,6 +427,7 @@ Regras e comportamento de ambos os formatos:
 - Em **arenas alternativas** (`<id>_arena2`, etc.), a lista `floors.<n>.mobs` da arena normalmente só reescreve `spawns` (mesma ordem/índice da lista raiz) — `type`/`mythic`/`amount` continuam vindo da definição raiz.
 - **Os mobs sempre nascem já perseguindo alguém da sessão** — assim que spawnam (e a cada 1s depois, junto do monitor de andar), o plugin define via `Mob#setTarget(...)` o jogador vivo mais próximo (dentre os da própria sessão) como alvo. Isso é forçado independente da IA vanilla de detecção por distância/visão — então, mesmo que `floor_spawn`/`return_spawn` do jogador fique longe de onde o mob nasceu (`spawns`), o mob ainda vai perseguir o jogador em vez de ficar parado. Se o alvo morrer/sair, um novo alvo é escolhido no próximo tick do monitor.
 - **Mobs da dungeon não brigam entre si.** `MobFriendlyFireListener` cancela qualquer dano entre dois mobs marcados como da dungeon (inclusive por flecha/projétil) — sem isso, a IA vanilla (`HurtByTargetGoal`) faria um esqueleto que acertasse um zumbi por acidente passar a mirar nele em vez de no jogador.
+- **Actionbar de mobs restantes.** Todo jogador da sessão recebe uma actionbar (`messages.floor_mobs_actionbar`, placeholder `{count}`) com a contagem atual de mobs vivos daquele andar — atualizada assim que o andar começa e a cada 1s (junto do monitor). A contagem reflete só os mobs realmente rastreados pela sessão (ver [tracking de mobs externos](#configyml) sobre `allowed_spawn_reasons`).
 
 #### Arenas alternativas e dungeons extra
 

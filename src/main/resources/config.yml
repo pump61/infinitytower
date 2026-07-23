@@ -38,6 +38,16 @@ tower:
     # Isso é usado para capturar minions do MythicMobs (ex: SkeletonKing)
     spawn_radius: 30
 
+    # Só mobs cujo motivo de spawn (CreatureSpawnEvent.SpawnReason) estiver
+    # nessa lista entram no rastreamento por raio acima. Isso evita que mobs
+    # selvagens normais do mundo (motivo NATURAL) sejam contados como parte
+    # da dungeon só por nascerem perto da arena.
+    # CUSTOM = a maioria das invocações via skill do MythicMobs.
+    # SPAWNER = spawner de bloco (vanilla ou usado por algumas skills).
+    allowed_spawn_reasons:
+      - CUSTOM
+      - SPAWNER
+
 dungeon:
   command_whitelist:
     - "g"

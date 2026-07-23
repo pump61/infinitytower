@@ -25,6 +25,7 @@ messages:
   dungeon_all_dead: "&cTodos morreram. A dungeon falhou!"
   floor_spawn_failed: "&cFalha ao spawnar mobs deste andar (&f{floor}&c). Dungeon encerrada."
   floor_no_mobs: "&cAndar configurado sem mobs (&f{floor}&c). Dungeon encerrada."
+  floor_mobs_actionbar: "&cMobs restantes: &f{count}"
   reward_invalid_item: "&cItem de recompensa inválido: &f{item}"
   mythicmob_missing: "&cMythicMobs não está instalado, mas foi solicitado: &f{mob}"
   mythicmob_spawn_failed: "&cFalha ao spawnar MythicMob: &f{mob}"
